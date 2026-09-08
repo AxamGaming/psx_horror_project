@@ -1,0 +1,105 @@
+[gd_resource type="AudioBusLayout" format=3 uid="uid://1j8054hbu4u0"]
+
+[sub_resource type="AudioEffectLowPassFilter" id="LPF_sfx"]
+resource_name = "Deafness"
+cutoff_hz = 20000.0
+
+[sub_resource type="AudioEffectReverb" id="REV_sfx"]
+resource_name = "Room"
+room_size = 0.5
+damping = 0.7
+wet = 0.15
+
+[sub_resource type="AudioEffectLowPassFilter" id="LPF_amb"]
+resource_name = "Deafness"
+cutoff_hz = 20000.0
+
+[sub_resource type="AudioEffectReverb" id="REV_amb"]
+resource_name = "Room"
+room_size = 0.5
+damping = 0.7
+wet = 0.15
+
+[sub_resource type="AudioEffectPanner" id="PAN_fl"]
+pan = -0.35
+
+[sub_resource type="AudioEffectPanner" id="PAN_fr"]
+pan = 0.35
+
+[sub_resource type="AudioEffectPanner" id="PAN_w0"]
+
+[sub_resource type="AudioEffectPanner" id="PAN_w1"]
+
+[sub_resource type="AudioEffectPanner" id="PAN_w2"]
+
+[sub_resource type="AudioEffectPanner" id="PAN_w3"]
+
+[resource]
+bus/1/name = &"SFX"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = 0.0
+bus/1/send = &"Master"
+bus/1/effect/0/effect = SubResource("LPF_sfx")
+bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("REV_sfx")
+bus/1/effect/1/enabled = true
+bus/2/name = &"Ambient"
+bus/2/solo = false
+bus/2/mute = false
+bus/2/bypass_fx = false
+bus/2/volume_db = 0.0
+bus/2/send = &"Master"
+bus/2/effect/0/effect = SubResource("LPF_amb")
+bus/2/effect/0/enabled = true
+bus/2/effect/1/effect = SubResource("REV_amb")
+bus/2/effect/1/enabled = true
+bus/3/name = &"FootL"
+bus/3/solo = false
+bus/3/mute = false
+bus/3/bypass_fx = false
+bus/3/volume_db = 0.0
+bus/3/send = &"SFX"
+bus/3/effect/0/effect = SubResource("PAN_fl")
+bus/3/effect/0/enabled = true
+bus/4/name = &"FootR"
+bus/4/solo = false
+bus/4/mute = false
+bus/4/bypass_fx = false
+bus/4/volume_db = 0.0
+bus/4/send = &"SFX"
+bus/4/effect/0/effect = SubResource("PAN_fr")
+bus/4/effect/0/enabled = true
+bus/5/name = &"World0"
+bus/5/solo = false
+bus/5/mute = false
+bus/5/bypass_fx = false
+bus/5/volume_db = 0.0
+bus/5/send = &"SFX"
+bus/5/effect/0/effect = SubResource("PAN_w0")
+bus/5/effect/0/enabled = true
+bus/6/name = &"World1"
+bus/6/solo = false
+bus/6/mute = false
+bus/6/bypass_fx = false
+bus/6/volume_db = 0.0
+bus/6/send = &"SFX"
+bus/6/effect/0/effect = SubResource("PAN_w1")
+bus/6/effect/0/enabled = true
+bus/7/name = &"World2"
+bus/7/solo = false
+bus/7/mute = false
+bus/7/bypass_fx = false
+bus/7/volume_db = 0.0
+bus/7/send = &"SFX"
+bus/7/effect/0/effect = SubResource("PAN_w2")
+bus/7/effect/0/enabled = true
+bus/8/name = &"World3"
+bus/8/solo = false
+bus/8/mute = false
+bus/8/bypass_fx = false
+bus/8/volume_db = 0.0
+bus/8/send = &"SFX"
+bus/8/effect/0/effect = SubResource("PAN_w3")
+bus/8/effect/0/enabled = true

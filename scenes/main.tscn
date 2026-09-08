@@ -1,0 +1,71 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/levels/corridor_level.tscn" id="2_level"]
+[ext_resource type="Shader" path="res://shaders/vhs_wiggle.gdshader" id="3_vhs"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_panel.tscn" id="4_panel_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="5_inv_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/death_overlay.tscn" id="6_death_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/item_toast.tscn" id="7_toast_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/survival_hud.tscn" id="8_hud_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/crosshair.tscn" id="9_cross_scn"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vhs"]
+shader = ExtResource("3_vhs")
+shader_parameter/wiggle = 0.03
+shader_parameter/wiggle_speed = 25
+shader_parameter/smear = 1.0
+shader_parameter/blur_samples = 15
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="GameViewport" type="SubViewport" parent="."]
+size = Vector2i(640, 360)
+render_target_update_mode = 4
+
+[node name="TestGraybox" parent="GameViewport" instance=ExtResource("2_level")]
+
+[node name="ViewportDisplay" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PostFX" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="VHS" type="ColorRect" parent="PostFX"]
+material = SubResource("ShaderMaterial_vhs")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="DebugPanel" parent="UI" instance=ExtResource("4_panel_scn")]
+
+[node name="InventoryUI" parent="UI" instance=ExtResource("5_inv_scn")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="SurvivalHUD" parent="HUD" instance=ExtResource("8_hud_scn")]
+
+[node name="Crosshair" parent="HUD" instance=ExtResource("9_cross_scn")]
+
+[node name="DeathOverlay" parent="UI" instance=ExtResource("6_death_scn")]
+
+[node name="ItemToast" parent="UI" instance=ExtResource("7_toast_scn")]
+
+[node name="CrosshairCrisp" parent="UI" instance=ExtResource("9_cross_scn")]
+alpha_mix = 0.7

@@ -1,0 +1,9 @@
+# Godot 4 editor cache (regenerated on import)
+.godot/
+
+# Export artifacts
+/export/
+
+# OS junk
+.DS_Store
+Thumbs.db

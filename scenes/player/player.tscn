@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://bc6o7oig0x6uc"]
+
+[ext_resource type="Script" uid="uid://cb3h0bkxnq4nl" path="res://scenes/player/movement.gd" id="1_mov"]
+[ext_resource type="Script" uid="uid://be4qlnn17kxly" path="res://scenes/player/mouse_look.gd" id="2_look"]
+[ext_resource type="Script" uid="uid://dbnrrqdlky7ek" path="res://scenes/player/camera_rig.gd" id="3_rig"]
+[ext_resource type="Script" uid="uid://wvnl1lm04pui" path="res://scenes/player/footsteps.gd" id="4_steps"]
+[ext_resource type="Script" uid="uid://bec6c6x730wse" path="res://scenes/player/flashlight_rig.gd" id="5_flash"]
+[ext_resource type="Script" uid="uid://rs5e365fkg2g" path="res://scenes/player/survival.gd" id="6_surv"]
+[ext_resource type="Script" uid="uid://wxlicjbsqbg7" path="res://scenes/player/weapon_system.gd" id="7_weap"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.35
+height = 1.8
+
+[node name="Player" type="CharacterBody3D" unique_id=426488572]
+collision_layer = 2
+script = ExtResource("1_mov")
+
+[node name="BodyCollision" type="CollisionShape3D" parent="." unique_id=931109268]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="HeadPivot" type="Node3D" parent="." unique_id=738379197]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+script = ExtResource("2_look")
+
+[node name="MainCamera" type="Camera3D" parent="HeadPivot" unique_id=1173166531]
+current = true
+script = ExtResource("3_rig")
+
+[node name="Footsteps" type="AudioStreamPlayer" parent="." unique_id=1439834512]
+script = ExtResource("4_steps")
+
+[node name="FlashlightRig" type="Node3D" parent="." unique_id=282060858]
+script = ExtResource("5_flash")
+
+[node name="Survival" type="Node" parent="." unique_id=2050107205]
+script = ExtResource("6_surv")
+
+[node name="Weapon" type="Node" parent="." unique_id=673369577]
+script = ExtResource("7_weap")

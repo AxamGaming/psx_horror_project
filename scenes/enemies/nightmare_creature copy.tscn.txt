@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://cnghfrusfew8c"]
+
+[ext_resource type="Script" uid="uid://bqff0vrcmhoo2" path="res://scenes/enemies/nightmare_creature.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://brhpc7esjhc1u" path="res://assets/models/nightmare_creature/nightmare_creature_1.glb" id="2_model"]
+[ext_resource type="AudioStream" uid="uid://dxwujnyi6w4xv" path="res://audio/sfx/creature_roar.wav" id="3_roar"]
+[ext_resource type="AudioStream" uid="uid://wlh82ybnx7vx" path="res://audio/sfx/creature_growl.wav" id="4_growl"]
+[ext_resource type="AudioStream" uid="uid://dmf737ki6qglk" path="res://audio/sfx/creature_step.wav" id="5_step"]
+[ext_resource type="AudioStream" uid="uid://qwcurpn48ux8" path="res://audio/sfx/creature_screech.wav" id="6_screech"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_og0ql"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_beacon"]
+shading_mode = 0
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_beacon"]
+material = SubResource("StandardMaterial3D_beacon")
+radius = 0.15
+height = 0.3
+
+[node name="NightmareCreature" type="CharacterBody3D" unique_id=1261331592]
+collision_layer = 2
+script = ExtResource("1_script")
+
+[node name="Body" type="CollisionShape3D" parent="." unique_id=1801926793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="BTPlayer" type="BTPlayer" parent="." unique_id=1250169341]
+blackboard_plan = SubResource("BlackboardPlan_og0ql")
+
+[node name="Model" parent="." unique_id=591407745 instance=ExtResource("2_model")]
+
+[node name="DebugBeacon" type="MeshInstance3D" parent="." unique_id=2003007228]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+mesh = SubResource("SphereMesh_beacon")
+
+[node name="Roar" type="AudioStreamPlayer" parent="." unique_id=1163494768]
+stream = ExtResource("3_roar")
+
+[node name="Growl" type="AudioStreamPlayer" parent="." unique_id=1246733800]
+stream = ExtResource("4_growl")
+
+[node name="Step" type="AudioStreamPlayer" parent="." unique_id=788225075]
+stream = ExtResource("5_step")
+
+[node name="Screech" type="AudioStreamPlayer" parent="." unique_id=823055910]
+stream = ExtResource("6_screech")

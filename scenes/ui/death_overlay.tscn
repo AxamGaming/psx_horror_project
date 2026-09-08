@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/death_overlay.gd" id="1_death"]
+[ext_resource type="FontFile" path="res://assets/fonts/SpecialElite-Regular.ttf" id="2_font"]
+
+[node name="DeathOverlay" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_death")
+
+[node name="Fade" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.22, 0.015, 0.015, 0.78)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/VBox"]
+text = "YOU DIED"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 46
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_colors/font_color = Color(0.85, 0.7, 0.66, 1)
+
+[node name="Hint" type="Label" parent="Center/VBox"]
+text = "[R]  rise again"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_colors/font_color = Color(0.7, 0.6, 0.58, 1)

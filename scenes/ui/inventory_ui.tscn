@@ -1,0 +1,349 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/inventory_ui.gd" id="1_inv"]
+[ext_resource type="Texture2D" path="res://assets/textures/decrepit_wallpaper.jpg" id="2_paper"]
+[ext_resource type="Texture2D" path="res://assets/textures/brown_leather.jpg" id="3_leather"]
+[ext_resource type="FontFile" path="res://assets/fonts/SpecialElite-Regular.ttf" id="4_font"]
+
+[sub_resource type="StyleBoxTexture" id="PanelBox"]
+texture = ExtResource("2_paper")
+modulate_color = Color(0.16, 0.14, 0.13, 0.96)
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxTexture" id="SlotBox00"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="SlotBox01"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox02"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox03"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox04"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox05"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox06"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox07"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox08"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox09"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox10"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox11"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox12"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox13"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox14"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox15"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox16"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox17"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox18"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="SlotBox19"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.1, 0.09, 0.08, 0.92)
+
+[sub_resource type="StyleBoxTexture" id="BtnBox"]
+texture = ExtResource("3_leather")
+modulate_color = Color(0.14, 0.12, 0.1, 0.95)
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+
+[node name="InventoryUI" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_inv")
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -210.0
+offset_right = 250.0
+offset_bottom = 210.0
+theme_override_styles/panel = SubResource("PanelBox")
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Panel/VBox"]
+
+[node name="Title" type="Label" parent="Panel/VBox/Header"]
+text = "INVENTORY"
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.87, 0.8, 0.68, 1)
+
+[node name="WeightLabel" type="Label" parent="Panel/VBox/Header"]
+horizontal_alignment = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.75, 0.68, 0.58, 1)
+
+[node name="Grid" type="GridContainer" parent="Panel/VBox"]
+columns = 5
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="Slot00" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox00")
+theme_override_styles/hover = SubResource("SlotBox00")
+theme_override_styles/pressed = SubResource("SlotBox00")
+
+[node name="Slot01" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox01")
+theme_override_styles/hover = SubResource("SlotBox01")
+theme_override_styles/pressed = SubResource("SlotBox01")
+
+[node name="Slot02" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox02")
+theme_override_styles/hover = SubResource("SlotBox02")
+theme_override_styles/pressed = SubResource("SlotBox02")
+
+[node name="Slot03" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox03")
+theme_override_styles/hover = SubResource("SlotBox03")
+theme_override_styles/pressed = SubResource("SlotBox03")
+
+[node name="Slot04" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox04")
+theme_override_styles/hover = SubResource("SlotBox04")
+theme_override_styles/pressed = SubResource("SlotBox04")
+
+[node name="Slot05" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox05")
+theme_override_styles/hover = SubResource("SlotBox05")
+theme_override_styles/pressed = SubResource("SlotBox05")
+
+[node name="Slot06" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox06")
+theme_override_styles/hover = SubResource("SlotBox06")
+theme_override_styles/pressed = SubResource("SlotBox06")
+
+[node name="Slot07" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox07")
+theme_override_styles/hover = SubResource("SlotBox07")
+theme_override_styles/pressed = SubResource("SlotBox07")
+
+[node name="Slot08" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox08")
+theme_override_styles/hover = SubResource("SlotBox08")
+theme_override_styles/pressed = SubResource("SlotBox08")
+
+[node name="Slot09" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox09")
+theme_override_styles/hover = SubResource("SlotBox09")
+theme_override_styles/pressed = SubResource("SlotBox09")
+
+[node name="Slot10" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox10")
+theme_override_styles/hover = SubResource("SlotBox10")
+theme_override_styles/pressed = SubResource("SlotBox10")
+
+[node name="Slot11" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox11")
+theme_override_styles/hover = SubResource("SlotBox11")
+theme_override_styles/pressed = SubResource("SlotBox11")
+
+[node name="Slot12" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox12")
+theme_override_styles/hover = SubResource("SlotBox12")
+theme_override_styles/pressed = SubResource("SlotBox12")
+
+[node name="Slot13" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox13")
+theme_override_styles/hover = SubResource("SlotBox13")
+theme_override_styles/pressed = SubResource("SlotBox13")
+
+[node name="Slot14" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox14")
+theme_override_styles/hover = SubResource("SlotBox14")
+theme_override_styles/pressed = SubResource("SlotBox14")
+
+[node name="Slot15" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox15")
+theme_override_styles/hover = SubResource("SlotBox15")
+theme_override_styles/pressed = SubResource("SlotBox15")
+
+[node name="Slot16" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox16")
+theme_override_styles/hover = SubResource("SlotBox16")
+theme_override_styles/pressed = SubResource("SlotBox16")
+
+[node name="Slot17" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox17")
+theme_override_styles/hover = SubResource("SlotBox17")
+theme_override_styles/pressed = SubResource("SlotBox17")
+
+[node name="Slot18" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox18")
+theme_override_styles/hover = SubResource("SlotBox18")
+theme_override_styles/pressed = SubResource("SlotBox18")
+
+[node name="Slot19" type="Button" parent="Panel/VBox/Grid"]
+custom_minimum_size = Vector2(64, 64)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("SlotBox19")
+theme_override_styles/hover = SubResource("SlotBox19")
+theme_override_styles/pressed = SubResource("SlotBox19")
+
+[node name="Actions" type="HBoxContainer" parent="Panel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="UseBtn" type="Button" parent="Panel/VBox/Actions"]
+text = "USE"
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.85, 0.78, 0.66, 1)
+theme_override_styles/normal = SubResource("BtnBox")
+theme_override_styles/hover = SubResource("BtnBox")
+theme_override_styles/pressed = SubResource("BtnBox")
+
+[node name="DropBtn" type="Button" parent="Panel/VBox/Actions"]
+text = "DROP"
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.85, 0.78, 0.66, 1)
+theme_override_styles/normal = SubResource("BtnBox")
+theme_override_styles/hover = SubResource("BtnBox")
+theme_override_styles/pressed = SubResource("BtnBox")
+
+[node name="CloseBtn" type="Button" parent="Panel/VBox/Actions"]
+text = "CLOSE [Tab]"
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.85, 0.78, 0.66, 1)
+theme_override_styles/normal = SubResource("BtnBox")
+theme_override_styles/hover = SubResource("BtnBox")
+theme_override_styles/pressed = SubResource("BtnBox")
+
+[node name="InfoLabel" type="Label" parent="Panel/VBox"]
+text = "Select a slot. World keeps running — stay sharp."
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.64, 0.55, 1)
+
+[connection signal="pressed" from="Panel/VBox/Actions/UseBtn" to="." method="_on_use"]
+[connection signal="pressed" from="Panel/VBox/Actions/DropBtn" to="." method="_on_drop"]
+[connection signal="pressed" from="Panel/VBox/Actions/CloseBtn" to="." method="toggle"]

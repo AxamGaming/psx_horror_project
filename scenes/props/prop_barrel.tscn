@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/prop_static.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/barrel_03/barrel_03_2k.gltf" id="2_mesh"]
+
+[node name="Prop" type="StaticBody3D"]
+script = ExtResource("1_script")
+surface_tag = "metal"
+
+[node name="Mesh" parent="." instance=ExtResource("2_mesh")]

@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="ItemDatabase" format=3 uid="uid://h583spoum6p7"]
+
+[ext_resource type="Script" uid="uid://dhqy2igbt1cld" path="res://data/item_data.gd" id="1_itemdata"]
+[ext_resource type="Script" uid="uid://cgg48qm1cbc6c" path="res://data/item_database.gd" id="2_db"]
+[ext_resource type="PackedScene" uid="uid://db6lletgxie5d" path="res://assets/models/medical_box/medical_box_2k.gltf" id="3_medmesh"]
+
+[sub_resource type="Resource" id="Item_shotgun"]
+script = ExtResource("1_itemdata")
+id = "shotgun"
+item_name = "Shotgun"
+weight = 3.5
+color = Color(0.72, 0.44, 0.18, 1)
+
+[sub_resource type="Resource" id="Item_shells"]
+script = ExtResource("1_itemdata")
+id = "shells"
+item_name = "Shell"
+color = Color(0.75, 0.18, 0.15, 1)
+
+[sub_resource type="Resource" id="Item_medkit"]
+script = ExtResource("1_itemdata")
+id = "medkit"
+item_name = "Medkit"
+weight = 0.8
+color = Color(0.92, 0.92, 0.92, 1)
+mesh = ExtResource("3_medmesh")
+
+[sub_resource type="Resource" id="Item_crowbar"]
+script = ExtResource("1_itemdata")
+id = "crowbar"
+item_name = "Crowbar"
+weight = 2.0
+color = Color(0.55, 0.58, 0.62, 1)
+
+[sub_resource type="Resource" id="Item_key"]
+script = ExtResource("1_itemdata")
+id = "key"
+item_name = "Old Key"
+color = Color(0.85, 0.68, 0.2, 1)
+
+[resource]
+script = ExtResource("2_db")
+items = [SubResource("Item_shotgun"), SubResource("Item_shells"), SubResource("Item_medkit"), SubResource("Item_crowbar"), SubResource("Item_key")]

@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://7lr4i03krrc3"]
+
+[ext_resource type="Script" uid="uid://cnp72fcdwp1w7" path="res://scenes/ui/debug_panel.gd" id="1_dbg"]
+
+[sub_resource type="StyleBoxFlat" id="PanelBox"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.04, 0.05, 0.06, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.45, 1)
+
+[node name="DebugPanel" type="PanelContainer" unique_id=654083011]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -371.0
+offset_top = 12.0
+offset_right = -83.0
+offset_bottom = 312.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("PanelBox")
+script = ExtResource("1_dbg")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=376125737]
+layout_mode = 2
+
+[node name="Line1" type="Label" parent="VBox" unique_id=181348348]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="Line2" type="Label" parent="VBox" unique_id=444902848]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="Line3" type="Label" parent="VBox" unique_id=1582374418]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="Line4" type="Label" parent="VBox" unique_id=332057222]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="Line5" type="Label" parent="VBox" unique_id=854183713]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="RowCarry" type="HBoxContainer" parent="VBox" unique_id=1408088178]
+layout_mode = 2
+
+[node name="RowCarryLabel" type="Label" parent="VBox/RowCarry" unique_id=286024163]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+text = "carry weight"
+
+[node name="CarrySlider" type="HSlider" parent="VBox/RowCarry" unique_id=172091683]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="RowStam" type="HBoxContainer" parent="VBox" unique_id=52837174]
+layout_mode = 2
+
+[node name="RowStamLabel" type="Label" parent="VBox/RowStam" unique_id=2094488019]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+text = "stamina"
+
+[node name="StamSlider" type="HSlider" parent="VBox/RowStam" unique_id=934037504]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="RowHealth" type="HBoxContainer" parent="VBox" unique_id=1944256347]
+layout_mode = 2
+
+[node name="RowHealthLabel" type="Label" parent="VBox/RowHealth" unique_id=823219585]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+text = "health"
+
+[node name="HealthSlider" type="HSlider" parent="VBox/RowHealth" unique_id=267849768]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="FocusOption" type="OptionButton" parent="VBox" unique_id=673138421]
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="VBox" unique_id=2095152434]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "F2 close/open · releases mouse"
+
+[connection signal="value_changed" from="VBox/RowCarry/CarrySlider" to="." method="_on_carry"]
+[connection signal="value_changed" from="VBox/RowStam/StamSlider" to="." method="_on_stam"]
+[connection signal="value_changed" from="VBox/RowHealth/HealthSlider" to="." method="_on_health"]
+[connection signal="item_selected" from="VBox/FocusOption" to="." method="_on_focus"]

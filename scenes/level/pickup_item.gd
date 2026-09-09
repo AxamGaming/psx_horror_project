@@ -76,6 +76,7 @@ func request_snap() -> void:
 	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		global_position + Vector3(0.0, 1.0, 0.0), global_position - Vector3(0.0, 3.0, 0.0)
 	)
+	q.collision_mask = 1   # R6: snap to world geometry, never onto a capsule
 	var r: Dictionary = space.intersect_ray(q)
 	if not r.is_empty():
 		global_position = (r["position"] as Vector3) + Vector3(0.0, 0.02, 0.0)

@@ -80,6 +80,11 @@ func _is_wood_below() -> bool:
 	var from: Vector3 = player.global_position + Vector3(0.0, 0.1, 0.0)
 	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, from - Vector3(0.0, 0.8, 0.0))
 	q.exclude = [player.get_rid()]
+	# R6: world geometry only. The default mask is ALL layers, so once the player
+	# moved to its own layer this probe could answer with the creature's capsule
+	# instead of the floor -> is_in_group("surface_wood") fails -> wood footsteps
+	# silently stop whenever the monster is standing on you.
+	q.collision_mask = 1
 	var r: Dictionary = space.intersect_ray(q)
 	if r.is_empty():
 		return false

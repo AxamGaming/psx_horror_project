@@ -1,7 +1,8 @@
-[gd_scene load_steps=36 format=3]
+[gd_scene load_steps=37 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="Script" path="res://scenes/level/heavy_door.gd" id="2_door"]
+[ext_resource type="Script" path="res://scenes/level/nav_baker.gd" id="90_nav"]
 [ext_resource type="Script" path="res://scenes/level/crawlspace_zone.gd" id="3_crawl"]
 
 [sub_resource type="Environment" id="Env_1"]
@@ -279,6 +280,7 @@ mesh = SubResource("Mesh_lintel")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.9)
 
 [node name="Door" type="StaticBody3D" parent="DoorAssembly/Hinge"]
+collision_layer = 16
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.9)
 
 [node name="Col" type="CollisionShape3D" parent="DoorAssembly/Hinge/Door"]
@@ -289,6 +291,7 @@ material_override = SubResource("Mat_crate")
 mesh = SubResource("Mesh_door")
 
 [node name="DoorTrigger" type="Area3D" parent="DoorAssembly"]
+collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 
 [node name="Col" type="CollisionShape3D" parent="DoorAssembly/DoorTrigger"]
@@ -328,6 +331,7 @@ material_override = SubResource("Mat_wall")
 mesh = SubResource("Mesh_tun")
 
 [node name="CrawlZone" type="Area3D" parent="Crawlspace"]
+collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 script = ExtResource("3_crawl")
 
@@ -336,3 +340,6 @@ shape = SubResource("Shape_crawlzone")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 5)
+
+[node name="NavBaker" type="Node" parent="."]
+script = ExtResource("90_nav")

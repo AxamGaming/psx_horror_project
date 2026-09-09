@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bc6o7oig0x6uc" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="Script" uid="uid://brcqfxor284ob" path="res://scenes/level/heavy_door.gd" id="2_door"]
+[ext_resource type="Script" path="res://scenes/level/nav_baker.gd" id="90_nav"]
 [ext_resource type="Script" uid="uid://dxg5wh225ejrt" path="res://scenes/level/crawlspace_zone.gd" id="3_crawl"]
 [ext_resource type="PackedScene" path="res://scenes/level/pickup_item.tscn" id="4_pickup"]
 [ext_resource type="PackedScene" path="res://scenes/props/prop_barrel.tscn" id="5_pbarrel"]
@@ -160,6 +161,7 @@ mesh = SubResource("Mesh_unit")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.9)
 
 [node name="Door" type="StaticBody3D" parent="Door1/Hinge" unique_id=739292512]
+collision_layer = 16
 transform = Transform3D(0.1, 0, 0, 0, 2, 0, 0, 0, 1.8, 0, 1, 0.9)
 
 [node name="Col" type="CollisionShape3D" parent="Door1/Hinge/Door" unique_id=1825660454]
@@ -170,6 +172,7 @@ material_override = SubResource("Mat_wood")
 mesh = SubResource("Mesh_unit")
 
 [node name="DoorTrigger" type="Area3D" parent="Door1" unique_id=2025708734]
+collision_mask = 4
 transform = Transform3D(1.6, 0, 0, 0, 2.2, 0, 0, 0, 2.8, 0, 1.1, 0)
 
 [node name="Col" type="CollisionShape3D" parent="Door1/DoorTrigger" unique_id=9813082]
@@ -238,6 +241,7 @@ material_override = SubResource("Mat_dark")
 mesh = SubResource("Mesh_unit")
 
 [node name="CrawlZone" type="Area3D" parent="Corridor" unique_id=1833327516]
+collision_mask = 4
 transform = Transform3D(2, 0, 0, 0, 1.2, 0, 0, 0, 3, 0, 0.6, 1.5)
 script = ExtResource("3_crawl")
 
@@ -302,6 +306,7 @@ mesh = SubResource("Mesh_unit")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.9)
 
 [node name="Door" type="StaticBody3D" parent="Door2/Hinge" unique_id=381750273]
+collision_layer = 16
 transform = Transform3D(0.1, 0, 0, 0, 2, 0, 0, 0, 1.8, 0, 1, 0.9)
 
 [node name="Col" type="CollisionShape3D" parent="Door2/Hinge/Door" unique_id=915325758]
@@ -312,6 +317,7 @@ material_override = SubResource("Mat_wood")
 mesh = SubResource("Mesh_unit")
 
 [node name="DoorTrigger" type="Area3D" parent="Door2" unique_id=1550409781]
+collision_mask = 4
 transform = Transform3D(1.6, 0, 0, 0, 2.2, 0, 0, 0, 2.8, 0, 1.1, 0)
 
 [node name="Col" type="CollisionShape3D" parent="Door2/DoorTrigger" unique_id=604106957]
@@ -469,7 +475,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0.4, -18.6)
 
 [node name="Creature" parent="." unique_id=1694156135 instance=ExtResource("12_creature")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -19)
-patrol_points = Array[Vector3]([Vector3(4, 0, -18), Vector3(-4, 0, -12), Vector3(0, 0, -7.5), Vector3(3.5, 0, -10)])
+patrol_points = Array[Vector3]([Vector3(4, 0, -18), Vector3(-4, 0, -13.6), Vector3(0, 0, -7.5), Vector3(3.5, 0, -10)])
 
 [node name="Player" parent="." unique_id=870347070 instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -10.512581)
+
+[node name="NavBaker" type="Node" parent="."]
+script = ExtResource("90_nav")

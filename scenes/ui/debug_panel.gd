@@ -107,8 +107,9 @@ func _update_creature_lines() -> void:
 		return
 	var st: Dictionary = cre.debug_state()
 	var sp: Vector3 = st["pos"]
-	_line5.text = "CRE %s d=%.1f (%.1f, %.1f, %.1f) %s%s anim=%s" % [
-		String(st["tag"]), float(st["dist"]), sp.x, sp.y, sp.z,
+	_line5.text = "CRE %s task=%s d=%.1f (%.1f, %.1f, %.1f) %s%s anim=%s" % [
+		String(st["tag"]), String(st.get("task", "-")), float(st["dist"]),
+		sp.x, sp.y, sp.z,
 		"AWK" if bool(st["awake"]) else "slp",
 		"/NEU" if bool(st["neutralized"]) else "",
 		String(st["anim"])]

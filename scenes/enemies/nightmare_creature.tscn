@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cnghfrusfew8c"]
 
-[ext_resource type="Script" uid="uid://bqff0vrcmhoo2" path="res://scenes/enemies/nightmare_creature.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://d2mgvu5xbahix" path="res://scenes/enemies/nightmare_creature.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://brhpc7esjhc1u" path="res://assets/models/nightmare_creature/nightmare_creature_1.glb" id="2_model"]
 [ext_resource type="AudioStream" uid="uid://dxwujnyi6w4xv" path="res://audio/sfx/creature_roar.wav" id="3_roar"]
 [ext_resource type="AudioStream" uid="uid://wlh82ybnx7vx" path="res://audio/sfx/creature_growl.wav" id="4_growl"]
@@ -8,8 +8,11 @@
 [ext_resource type="AudioStream" uid="uid://qwcurpn48ux8" path="res://audio/sfx/creature_screech.wav" id="6_screech"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.4
-height = 1.8
+radius = 0.45
+height = 1.9
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_head"]
+radius = 0.32
 
 [sub_resource type="BlackboardPlan" id="BlackboardPlan_og0ql"]
 
@@ -24,11 +27,16 @@ height = 0.3
 
 [node name="NightmareCreature" type="CharacterBody3D" unique_id=1261331592]
 collision_layer = 2
+collision_mask = 17
 script = ExtResource("1_script")
 
 [node name="Body" type="CollisionShape3D" parent="." unique_id=1801926793]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 shape = SubResource("CapsuleShape3D_body")
+
+[node name="Head" type="CollisionShape3D" parent="." unique_id=49708701]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+shape = SubResource("SphereShape3D_head")
 
 [node name="BTPlayer" type="BTPlayer" parent="." unique_id=1250169341]
 blackboard_plan = SubResource("BlackboardPlan_og0ql")

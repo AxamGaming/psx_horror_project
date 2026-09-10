@@ -10,3 +10,4 @@ func _tick(_delta: float) -> Status:
 	if cre.awareness == null:
 		return FAILURE
 	return SUCCESS if cre.awareness.heard() else FAILURE
+# NOTE: canonical file (a stale PascalCase duplicate condHearsPlayer.gd that called the removed get_memory() API was deleted in the R16 pass — on case-insensitive file systems the two used to collide).

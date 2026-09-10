@@ -30,3 +30,4 @@ func _tick(_delta: float) -> Status:
 		cre.move_toward_point(target, cre.run_speed, cre.attack_standoff)
 		cre.play_gait(cre.run_speed)
 	return RUNNING
+# NOTE: canonical file (a stale PascalCase duplicate actChase.gd that called the removed get_memory() API was deleted in the R16 pass — on case-insensitive file systems the two used to collide).

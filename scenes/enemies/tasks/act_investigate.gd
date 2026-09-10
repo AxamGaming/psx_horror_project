@@ -61,3 +61,4 @@ func _tick(delta: float) -> Status:
 	_dwell = 0.0
 	cre.play_gait(cre.run_speed * 0.75)
 	return RUNNING
+# NOTE: canonical file (a stale PascalCase duplicate actInvestigate.gd that called the removed get_memory() API was deleted in the R16 pass — on case-insensitive file systems the two used to collide).

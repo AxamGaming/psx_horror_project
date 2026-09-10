@@ -100,7 +100,8 @@ func _update_creature_lines() -> void:
 	if _player != null:
 		ppos = _player.global_position
 		onfl = _player.is_on_floor()
-	_line4.text = "PLY (%.1f, %.1f, %.1f) floor=%s" % [ppos.x, ppos.y, ppos.z, str(onfl)]
+	_line4.text = "PLY (%.1f, %.1f, %.1f) floor=%s%s" % [ppos.x, ppos.y, ppos.z, str(onfl),
+			" FLY" if _player.fly_debug else ""]
 	var cre: NightmareCreature = get_tree().get_first_node_in_group("creature") as NightmareCreature
 	if cre == null:
 		_line5.text = "CRE none in tree"

@@ -142,21 +142,43 @@ func _trace_shot(fwd: Vector3) -> void:
 	# 8-pellet cone (~±3°): when enemies arrive, the spread will matter.
 	for i in range(8):
 		var dir: Vector3 = (fwd + b.x * randf_range(-0.05, 0.05) + b.y * randf_range(-0.05, 0.05)).normalized()
-		var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-			_rig.global_position, _rig.global_position + dir * fire_distance
-		)
-		if player_node != null:
-			q.exclude = [player_node.get_rid()]
-		var r: Dictionary = space.intersect_ray(q)
-		if not r.is_empty():
-			# Pellet hit: walk up the tree for anything that takes damage
-			# (the creature, future enemies, destructibles...).
+		var from: Vector3 = _rig.global_position
+		# R16: pellets also test AREAS so the creature's head hitbox (an Area3D
+		# since the head sphere stopped being body collision — it was jamming
+		# the creature in every doorway) still takes the hit. Non-damageable
+		# areas in the lane (door triggers, crawlspace zones, pickup fields)
+		# are skipped and the pellet continues past them — bounded re-cast.
+		for _skip in range(3):
+			var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+				from, from + dir * fire_distance
+			)
+			if player_node != null:
+				q.exclude = [player_node.get_rid()]
+			q.collide_with_areas = true
+			var r: Dictionary = space.intersect_ray(q)
+			if r.is_empty():
+				break
 			var node: Node = r.get("collider") as Node
+			if node is Area3D and not _leads_to_damage(node):
+				var hp: Vector3 = r.get("position", from)
+				from = hp + dir * 0.05
+				continue
+			# Pellet hit: walk up the tree for anything that takes damage
+			# (the creature, its head hitbox, future enemies, destructibles...).
 			while node != null:
 				if node.has_method("take_damage"):
 					node.take_damage(12.0, dir)
 					break
 				node = node.get_parent()
+			break
+
+
+func _leads_to_damage(n: Node) -> bool:
+	while n != null:
+		if n.has_method("take_damage"):
+			return true
+		n = n.get_parent()
+	return false
 
 
 func _play_break_open() -> void:

@@ -56,7 +56,17 @@ func _ready() -> void:
 	# 1.8 = 9 voxels, 0.2 = 1 voxel. Doorway strip stays 1.8 - 0.9 = 0.9 m.
 	mesh.agent_radius = 0.45
 	mesh.agent_height = 1.8        # carves out the 1.15 m crawlspace
-	mesh.agent_max_climb = 0.2     # the 0.4 m Stage stays an obstacle
+	# R16: the 0.4 m hall Stage top used to bake as a DISCONNECTED island
+	# (climb 0.2 < 0.4): a player on or beside it made every chase target
+	# "unreachable", the goal snapped onto the island, the path ended at the
+	# Stage foot and the creature body-checked the side forever. 0.6 gives the
+	# voxel conversion real margin (0.4/0.2 truncates to 1-2 voxels depending
+	# on float rounding — measured: the Stage stayed disconnected at 0.4,
+	# polys 87; at 0.6 it merges, polys 100+ and the probe path shortens).
+	# Paths now route OVER the Stage (or cleanly around it), and the
+	# creature's step-hop (step_height 0.5, jump anim) can physically follow.
+	# Crates (1 m) and barrels (0.93 m) remain obstacles.
+	mesh.agent_max_climb = 0.6
 	mesh.agent_max_slope = 45.0
 	mesh.geometry_source_geometry_mode = NavigationMesh.SOURCE_GEOMETRY_GROUPS_EXPLICIT
 	mesh.geometry_source_group_name = NAV_GROUP

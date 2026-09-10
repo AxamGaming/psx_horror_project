@@ -5,6 +5,8 @@ extends CharacterBody3D
 ##
 ## SINGLE-WRITER RULE (IMPLEMENTATION_PLAN.md, Rule 1):
 ##   - This script owns the body's POSITION / VELOCITY only.
+##   - DEBUG FLY lives HERE (not in a sibling node) so the single-writer rule
+##     survives: F toggles noclip free-flight (see _fly_move).
 ##   - Body YAW + HeadPivot PITCH are owned by MouseLook.
 ##   - The Camera3D's LOCAL transform will be owned exclusively by CameraRig
 ##     (Phase 3). This script must never touch the camera.
@@ -38,6 +40,15 @@ enum Gait { IDLE, WALK, SPRINT, CROUCH }
 @export var allow_jump: bool = true
 @export var jump_speed: float = 4.2
 
+@export_group("Debug Fly (F = noclip free-flight)")
+## WASD moves along the camera axes, SPACE rises, C/CTRL descends, SHIFT
+## boosts. Collision mask drops to 0 (true noclip — you can hover inside the
+## level geometry), footsteps/gait/noise go silent so the creature ignores you,
+## and stamina does not drain. Press F again (or die) to restore normal body.
+@export var fly_speed: float = 8.0
+@export var fly_sprint_multiplier: float = 2.5
+@export var fly_acceleration: float = 12.0
+
 @export_group("Crouch")
 @export var stand_height: float = 1.8
 @export var crouch_height: float = 1.1
@@ -62,6 +73,9 @@ var external_crouch: bool = false
 var exhausted: bool = false
 ## Set by SurvivalSystem on death: input frozen, body settles.
 var dead: bool = false
+## DEBUG: true while F-toggled noclip flight owns the body (read-only for
+## other systems — the debug panel shows it as "FLY").
+var fly_debug: bool = false
 
 # --- Internals ----------------------------------------------------------------
 # Explicit casts, no `:=` inference, no declaration-order dependencies
@@ -73,6 +87,7 @@ var dead: bool = false
 var _current_height: float = 1.8
 var _was_on_floor: bool = false
 var _wall_cd: float = 0.0
+var _saved_collision_mask: int = 0
 
 
 func _ready() -> void:
@@ -84,10 +99,17 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if dead:
 		# Corpse: no input, gravity still applies so the body settles.
+		# (Dying mid-flight restores collisions so the body doesn't fall
+		# through the world.)
+		if fly_debug:
+			_exit_fly()
 		velocity.x = 0.0
 		velocity.z = 0.0
 		velocity.y = maxf(velocity.y - gravity * delta, -max_fall_speed)
 		move_and_slide()
+		return
+	if fly_debug:
+		_fly_move(delta)
 		return
 	_handle_crouch(delta)
 	_apply_gravity(delta)
@@ -176,6 +198,67 @@ func _handle_jump() -> void:
 ## Horizontal shove from creature attacks etc.
 func apply_knockback(dir: Vector3, force: float) -> void:
 	velocity += Vector3(dir.x, 0.0, dir.z).normalized() * force
+
+
+# --- DEBUG FLY / NOCLIP (F) ---------------------------------------------------
+
+func _unhandled_input(event: InputEvent) -> void:
+	if InputMap.has_action("debug_fly") and event.is_action_pressed("debug_fly"):
+		_toggle_fly()
+
+
+func _toggle_fly() -> void:
+	if dead:
+		return
+	if fly_debug:
+		_exit_fly()
+	else:
+		fly_debug = true
+		_saved_collision_mask = collision_mask
+		collision_mask = 0          # true noclip: collide with nothing
+		velocity = Vector3.ZERO
+		_wall_cd = 999.0            # no wall-slam thud on re-entry frames
+		print("DEBUG FLY: ON  (WASD move, SPACE up, C/CTRL down, SHIFT boost, F exits)")
+
+
+func _exit_fly() -> void:
+	fly_debug = false
+	collision_mask = _saved_collision_mask
+	velocity = Vector3.ZERO
+	input_active = false
+	print("DEBUG FLY: OFF")
+
+
+func _fly_move(delta: float) -> void:
+	# Camera-axis flight: full 3D along the look direction (pitch included).
+	var cam_basis: Basis = _head_pivot.global_transform.basis
+	var input_dir: Vector2 = Input.get_vector(
+		"move_left", "move_right", "move_forward", "move_back"
+	)
+	var wish: Vector3 = Vector3.ZERO
+	if input_dir.length_squared() > 0.01:
+		wish = (cam_basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
+	if Input.is_action_pressed("jump"):
+		wish += Vector3.UP
+	if Input.is_action_pressed("crouch"):
+		wish -= Vector3.UP
+	if wish.length_squared() > 1.0:
+		wish = wish.normalized()
+	var speed: float = fly_speed
+	if Input.is_action_pressed("sprint"):
+		speed *= fly_sprint_multiplier
+	var target: Vector3 = wish * speed
+	velocity = velocity.lerp(target, 1.0 - exp(-fly_acceleration * delta))
+	# Direct integration — no move_and_slide, no collision queries at all.
+	global_position += velocity * delta
+	# Silent, weightless observer state: no footsteps, no hearing signature,
+	# no stamina drain (survival gates sprint on these values).
+	input_active = false
+	planar_speed = 0.0
+	is_sprinting = false
+	is_crouched = false
+	noise_level = 0.0
+	gait = Gait.IDLE
 
 
 func _handle_crouch(delta: float) -> void:

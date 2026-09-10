@@ -57,6 +57,14 @@ func tick(delta: float) -> void:
 		return
 	if _creature.is_amnesiac():
 		_reset_sensors()
+		# R16: the post-recover daze dulls the far senses, but something
+		# pressing against its face still startles it out of the fog — the
+		# old behaviour ignored the player for 5 s at point-blank range
+		# ("it just walks past me and does nothing").
+		if _creature.dist_to_player() < _creature.proximity_range * 0.75 \
+				and _point_blank_los():
+			_creature.startle()
+			_remember(_player.global_position)
 		return
 
 	# ── Vision ───────────────────────────────────────────────────────────────

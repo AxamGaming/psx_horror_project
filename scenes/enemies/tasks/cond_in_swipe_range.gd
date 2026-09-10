@@ -21,4 +21,8 @@ func _tick(_delta: float) -> Status:
 		return SUCCESS                    # commit to the telegraph already started
 	if not cre.attack_ready():
 		return FAILURE                    # on cooldown -> fall through to lunge/chase
+	# R18: vertical gate — don't wind up at a target it physically can't reach
+	# (hovering debug-fly player, tall ledge). Stage-height (0.4 m) is fine.
+	if absf(cre.player_pos().y - cre.global_position.y) > 1.6:
+		return FAILURE
 	return SUCCESS if cre.dist_to_player() < cre.swipe_range else FAILURE

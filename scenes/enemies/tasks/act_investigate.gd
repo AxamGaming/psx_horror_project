@@ -1,12 +1,16 @@
 @tool
 class_name ActInvestigate
 extends BTAction
-## ROUND 16, reference state_searching: go to the last-known position, then sweep
-## up to 2 walkable search points around it, then dwell (sniff sweep) and give up.
-## R15 parked at one point and dwelt, which read as "standing there bugging out".
+## Go to the alert target (last known player position), then sweep two search
+## points around it, then dwell-sniff and give up.
+##
+## Also uses awareness.last_known_pos() as a fallback target when has_alert()
+## is true but the alert position is stale — ensures the creature always has
+## a meaningful destination even when set_alert() debouncing holds back a
+## re-stamp.
 
 var _dwell: float = 0.0
-var _total: float = 0.0      # ROUND 19: hard cap (reference search_time)
+var _total: float = 0.0
 var _search_left: int = 2
 var _target: Vector3 = Vector3.ZERO
 var _has_target: bool = false
@@ -28,16 +32,23 @@ func _tick(delta: float) -> Status:
 	if _total > 25.0:
 		cre.clear_alert()
 		return SUCCESS
+
 	if not _has_target:
-		_target = cre.get_alert_target()
+		# Prefer awareness memory (fresher) over debounced alert target.
+		if cre.awareness != null and cre.awareness.has_memory():
+			_target = cre.awareness.last_known_pos()
+		else:
+			_target = cre.get_alert_target()
 		_has_target = true
+
 	if cre.move_toward_point(_target, cre.run_speed * 0.75, 0.8):
 		if _search_left > 0:
 			_search_left -= 1
 			_target = cre.search_point_near(cre.get_alert_target(), 3.0)
-			_dwell = 0.0   # <-- only reset here, on a new search point
+			_dwell = 0.0
 			cre.play_gait(cre.run_speed * 0.75)
 			return RUNNING
+		# Reached all search points — dwell and sniff.
 		cre.stop_move()
 		cre.play_anim(cre.anim_battle_idle)
 		cre.turn_slow(delta)
@@ -46,6 +57,7 @@ func _tick(delta: float) -> Status:
 			cre.clear_alert()
 			return SUCCESS
 		return RUNNING
-	# DO NOT reset _dwell here — traveling toward the dwell point shouldn't wipe it
+
+	_dwell = 0.0
 	cre.play_gait(cre.run_speed * 0.75)
 	return RUNNING

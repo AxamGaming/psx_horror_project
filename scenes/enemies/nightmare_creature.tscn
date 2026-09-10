@@ -34,14 +34,16 @@ script = ExtResource("1_script")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="Head" type="CollisionShape3D" parent="." unique_id=49708701]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+[node name="Head" type="CollisionShape3D" parent="." unique_id=533808813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.088463426, 1.7185364, 0.99742234)
 shape = SubResource("SphereShape3D_head")
 
 [node name="BTPlayer" type="BTPlayer" parent="." unique_id=1250169341]
 blackboard_plan = SubResource("BlackboardPlan_og0ql")
 
-[node name="Model" parent="." unique_id=591407745 instance=ExtResource("2_model")]
+[node name="ModelRoot" type="Node3D" parent="." unique_id=-1293732729]
+
+[node name="Model" parent="ModelRoot" unique_id=591407745 instance=ExtResource("2_model")]
 
 [node name="DebugBeacon" type="MeshInstance3D" parent="." unique_id=2003007228]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)

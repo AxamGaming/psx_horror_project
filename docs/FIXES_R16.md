@@ -278,9 +278,10 @@ fixed right/left strafes. Fixes:
 
 # Debug Fly / Noclip (F key)
 
-- **F** toggles free-flight noclip (new `debug_fly` input action; the
-  **flashlight moved to G** — rebind in Project Settings → Input Map if you
-  want it elsewhere).
+- The `debug_fly` input action toggles free-flight noclip. (Shipped as F with
+  the flashlight on G; the project has since been **rebound by AxamGaming to
+  fly = G, flashlight = F** — everything keys off the action, so rebinding in
+  Project Settings → Input Map always works.)
 - While flying: **WASD** moves along the camera axes (full 3D, pitch
   included), **SPACE** rises, **C/CTRL** descends, **SHIFT** boosts
   (8 m/s → 20 m/s). Exports on the Player body: `fly_speed`,
@@ -347,3 +348,37 @@ transient (normal cornering), door force-opens working.
 
 **Validation:** fly suite 5/5, AI suite now 24 assertions (incl. P6f roar
 voice-during-pose and P6g voice-cut-after-pose), 5 consecutive 0-failure runs.
+
+---
+
+# R19 — point-blank animation glitches (from the kiting-combat playtest log)
+
+Three distinct close-range glitches, all visible in the session log
+(`ActSwipe vreal=2.17`, `LUNGE START 8290 → WINDUP 8457`, 2.2 m/s jitter
+while net displacement ~1.3 m/s):
+
+1. **Skating swings** — `start_windup()` called `nav.stop()`, but the
+   velocity watchdog deliberately skipped winding frames, so *nobody* zeroed
+   velocity.x/z: the chase (or unstick-backoff) speed bled through the entire
+   ~1 s attack pose and the creature slid across the floor mid-swing.
+   → Windup now plants the feet (velocity zeroed at start *and* cancelled),
+   and the watchdog no longer exempts winding (lunges still own their
+   velocity — they are agent-driven animation physics).
+2. **Jump→attack snap on an aborted lunge** — a one-frame vision flicker
+   mid-dash aborted the lunge, and `cancel_lunge()` charged no attack lockout
+   and no anim hold, so the very next tick insta-wound-up: jump pose cut to a
+   swing 0.16 s in. → Aborted lunges now hold the jump/landing pose 0.35 s
+   and lock the swing out for 0.45 s.
+3. **Standoff flapping** — at point-blank the distance oscillates around
+   `attack_standoff` (depenetration pushes + knockback + a kiting player),
+   and ActChase's hard `dist <= 1.35` test flipped `stop+battle_idle` ↔
+   `run+Run` every tick. → Hysteresis: enter standoff at 1.35 m, leave only
+   past 1.70 m.
+
+New continuous harness detectors (run over the WHOLE scenario, not windows):
+- **P9**: any frame with commanded horizontal velocity while `is_winding()`
+  is a violation — 0 tolerated. (Pre-fix logs would trip this constantly.)
+- **P10**: animation flip-rate while awake within 1.8 m of the player must
+  stay < 5/s (flapping measured ~0.5/s post-fix; the bug regime is ~30/s).
+
+Validation: ai_selftest 26/26 × 3 runs, fly_selftest 5/5, import clean.

@@ -11,8 +11,8 @@ extends Node3D
 ## LANTERN item can reuse AudioMgr.play_world_sound() for a positioned buzz.
 ## The doc's "light synced to organic sway" lives in the lag below, not audio.
 ##
-## G toggles (F became the debug fly/noclip toggle — see movement.gd).
-## Light + click children are built in code (no .tscn churn).
+## F toggles (the debug fly/noclip lives on G — action "debug_fly" in
+## movement.gd). Light + click children are built in code (no .tscn churn).
 ## ============================================================================
 
 @export var lag_rate: float = 14.0            # higher = lamp glued tighter to head

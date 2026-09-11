@@ -241,7 +241,10 @@ func tick(delta: float) -> void:
 	_prev_pos = _creature.global_position
 
 	# ── Velocity watchdog: kill ghost velocity when no task is driving ────────
-	if not _creature._lunging and not _creature._winding and not _creature._neutralized:
+	# R19: winding NO LONGER exempt — the navigator is stopped for the swing,
+	# so without this the chase speed bled through the whole attack pose
+	# (skating swipes at point-blank). Lunges still own their velocity.
+	if not _creature._lunging and not _creature._neutralized:
 		if _stamp == _stamp_prev:
 			_creature.velocity.x = 0.0
 			_creature.velocity.z = 0.0

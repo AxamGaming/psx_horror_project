@@ -25,6 +25,7 @@ var _fails: int = 0
 var _once_map: Dictionary = {}
 var _start_pos: Vector3 = Vector3.ZERO
 var _used_fallback: bool = false
+var _fly_keycode: int = KEY_G
 
 
 func _once(key: String) -> bool:
@@ -35,13 +36,13 @@ func _once(key: String) -> bool:
 
 
 func _send_f() -> void:
-	# Route a real F key event through the input system (viewport → unhandled).
+	# Route a real key event for whatever key debug_fly is bound to.
 	var down := InputEventKey.new()
-	down.physical_keycode = KEY_F
+	down.physical_keycode = _fly_keycode
 	down.pressed = true
 	Input.parse_input_event(down)
 	var up := InputEventKey.new()
-	up.physical_keycode = KEY_F
+	up.physical_keycode = _fly_keycode
 	up.pressed = false
 	Input.parse_input_event(up)
 
@@ -69,24 +70,27 @@ func _process(delta: float) -> bool:
 	var mask: int = int(_player.get("collision_mask"))
 	var pos: Vector3 = _player.global_position
 
-	# A: binding
+	# A: binding — debug_fly must exist, have a key, and NOT collide with the
+	# flashlight key (which physical key each uses is the project's choice:
+	# upstream shipped fly=F/light=G, this repo rebinds fly=G/light=F).
 	if _t >= 1.0 and _once("A"):
 		var ok: bool = InputMap.has_action("debug_fly")
-		var has_f: bool = false
+		var fly_key: int = 0
 		if ok:
 			for ev in InputMap.action_get_events("debug_fly"):
 				var k := ev as InputEventKey
-				if k != null and k.physical_keycode == KEY_F:
-					has_f = true
-		# Flashlight must have moved off F (else both fire on one press).
-		var flash_off_f: bool = true
+				if k != null and k.physical_keycode != 0:
+					fly_key = k.physical_keycode
+		var clash: bool = false
 		if InputMap.has_action("flashlight"):
 			for ev in InputMap.action_get_events("flashlight"):
 				var k := ev as InputEventKey
-				if k != null and k.physical_keycode == KEY_F:
-					flash_off_f = false
-		_results.append(("PASS" if (ok and has_f and flash_off_f) else "FAIL") + \
-				" A debug_fly bound to F, flashlight moved off F")
+				if k != null and fly_key != 0 and k.physical_keycode == fly_key:
+					clash = true
+		var bound_ok: bool = ok and fly_key != 0 and not clash
+		_fly_keycode = fly_key
+		_results.append(("PASS" if bound_ok else "FAIL") + \
+				" A debug_fly bound (keycode %d) and not colliding with flashlight" % fly_key)
 
 	# B: toggle ON at t=2
 	if _t >= 2.0 and _once("B"):

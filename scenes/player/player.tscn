@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://bc6o7oig0x6uc"]
 
-[ext_resource type="Script" uid="uid://cb3h0bkxnq4nl" path="res://scenes/player/movement.gd" id="1_mov"]
+[ext_resource type="Script" uid="uid://bu6nqad5fsfn4" path="res://scenes/player/movement.gd" id="1_mov"]
 [ext_resource type="Script" uid="uid://be4qlnn17kxly" path="res://scenes/player/mouse_look.gd" id="2_look"]
 [ext_resource type="Script" uid="uid://dbnrrqdlky7ek" path="res://scenes/player/camera_rig.gd" id="3_rig"]
 [ext_resource type="Script" uid="uid://tfqjxm1m0abo" path="res://scenes/player/footsteps.gd" id="4_steps"]
-[ext_resource type="Script" uid="uid://bec6c6x730wse" path="res://scenes/player/flashlight_rig.gd" id="5_flash"]
+[ext_resource type="Script" uid="uid://b8y1ktl5rfbrj" path="res://scenes/player/flashlight_rig.gd" id="5_flash"]
 [ext_resource type="Script" uid="uid://rs5e365fkg2g" path="res://scenes/player/survival.gd" id="6_surv"]
-[ext_resource type="Script" uid="uid://wxlicjbsqbg7" path="res://scenes/player/weapon_system.gd" id="7_weap"]
+[ext_resource type="Script" uid="uid://cf5shyfjp5pe7" path="res://scenes/player/weapon_system.gd" id="7_weap"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.35

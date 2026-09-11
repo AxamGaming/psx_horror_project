@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cnghfrusfew8c"]
 
-[ext_resource type="Script" uid="uid://d2mgvu5xbahix" path="res://scenes/enemies/nightmare_creature.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b3o3cnwpna5oc" path="res://scenes/enemies/nightmare_creature.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://brhpc7esjhc1u" path="res://assets/models/nightmare_creature/nightmare_creature_1.glb" id="2_model"]
-[ext_resource type="AudioStream" uid="uid://dxwujnyi6w4xv" path="res://audio/sfx/creature_roar.wav" id="3_roar"]
+[ext_resource type="AudioStream" uid="uid://dfxd5rd5p2gtb" path="res://audio/sfx/creature_roar.wav" id="3_roar"]
 [ext_resource type="AudioStream" uid="uid://wlh82ybnx7vx" path="res://audio/sfx/creature_growl.wav" id="4_growl"]
 [ext_resource type="AudioStream" uid="uid://dmf737ki6qglk" path="res://audio/sfx/creature_step.wav" id="5_step"]
 [ext_resource type="AudioStream" uid="uid://qwcurpn48ux8" path="res://audio/sfx/creature_screech.wav" id="6_screech"]

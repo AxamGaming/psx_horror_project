@@ -66,6 +66,11 @@ var _p7_feed: bool = false
 var _p7_eat: bool = false
 var _p8_notfeed: bool = false
 var _p8_walk: bool = false
+var _p9_violations: int = 0        # frames with commanded velocity while winding
+var _p10_flips: int = 0            # anim switches observed at point-blank
+var _p10_zone_t: float = 0.0       # time spent at point-blank (awake, combat)
+var _prev_anim: String = ""
+var _last_t: float = 0.0
 
 
 func _once(key: String) -> bool:
@@ -128,10 +133,28 @@ func _process(delta: float) -> bool:
 	var cpos: Vector3 = _cre.global_position
 	var ppos: Vector3 = _player.global_position
 
-	# ── P0: baker ready ───────────────────────────────────────────────────────
-	if _t >= 2.0 and _once("baker"):
+	# ── Continuous point-blank glitch detectors (R19) ────────────────────────
+	var dt_frame: float = _t - _last_t
+	_last_t = _t
+	# P9: a windup must be rooted — velocity while winding = skating swing.
+	if bool(_cre.call("is_winding")):
+		var hv: Vector3 = _cre.velocity
+		if Vector2(hv.x, hv.z).length() > 0.05:
+			_p9_violations += 1
+	# P10: anim flip rate while fighting at point-blank (standoff flapping).
+	if anim != "":
+		var awake_c: bool = bool(st.get("awake", false)) and not bool(st.get("neutralized", false))
+		if awake_c and float(st.get("dist", 99.0)) < 1.8 and task != "Feeding":
+			_p10_zone_t += dt_frame
+			if _prev_anim != "" and anim != _prev_anim:
+				_p10_flips += 1
+	_prev_anim = anim
+
+	# ── P0: baker ready (the level grew: degenerate-first-bake retry + a bigger
+	# mesh can land after t=2, so sample up to t=4) ─────────────────────────
+	if _t >= 4.0 and _once("baker"):
 		var ok: bool = _baker != null and bool(_baker.call("is_ready"))
-		_results.append(("PASS" if ok else "FAIL") + " P0 nav baker ready by t=2")
+		_results.append(("PASS" if ok else "FAIL") + " P0 nav baker ready by t=4")
 
 	# ── P1: proximity wake + chase + facing ───────────────────────────────────
 	if _t >= 2.0 and _once("wake_pos"):
@@ -339,6 +362,13 @@ func _process(delta: float) -> bool:
 func _report() -> void:
 	print("\n══════════════ AI SELF-TEST REPORT (t=%.1f) ══════════════" % _t)
 	var fails: int = 0
+	var p9ok: bool = _p9_violations == 0
+	_results.append(("PASS" if p9ok else "FAIL") + \
+			" P9 windups are rooted — no skating swings (violations=%d)" % _p9_violations)
+	var flip_rate: float = _p10_flips / maxf(_p10_zone_t, 0.001)
+	var p10ok: bool = flip_rate < 5.0
+	_results.append(("PASS" if p10ok else "FAIL") + \
+			" P10 point-blank anim flip rate %.2f/s over %.1fs (want < 5)" % [flip_rate, _p10_zone_t])
 	for r in _results:
 		print("  " + r)
 		if r.begins_with("FAIL"):

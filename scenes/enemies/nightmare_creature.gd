@@ -727,6 +727,12 @@ func start_windup() -> void:
 	_winding = true
 	if nav != null:
 		nav.stop()
+	# R19: plant the feet. nav.stop() only deactivates the navigator, and the
+	# velocity watchdog used to skip winding frames — so whatever speed the
+	# chase/backoff had bled into the swing and the creature SKATED through
+	# the whole attack pose (player log: ActSwipe vreal=2.17).
+	velocity.x = 0.0
+	velocity.z = 0.0
 	# R16: randomised swing variant — attack_1/2/3 all see use now.
 	var opts: Array[String] = [anim_attack, anim_attack_2, anim_attack_3]
 	_attack_clip = opts[randi() % opts.size()]
@@ -768,6 +774,8 @@ func do_swipe() -> void:
 func cancel_windup() -> void:
 	_winding = false
 	_windup_t = 0.0
+	velocity.x = 0.0
+	velocity.z = 0.0
 
 
 func is_winding() -> bool:
@@ -802,7 +810,12 @@ func cancel_lunge() -> void:
 	_lunge_t = 0.0
 	_lunge_hit = false
 	_lunge_cd = lunge_cooldown
-	_anim_lock_t = maxf(_anim_lock_t, 0.25)
+	# R19: an aborted dash (a one-frame vision flicker mid-lunge used to do
+	# this) must LAND, not snap jump→attack in 0.16 s (player log: LUNGE
+	# START 8290 → WINDUP 8457). Hold the jump pose briefly and lock out the
+	# swing so the next tick can't insta-windup.
+	_anim_lock_t = maxf(_anim_lock_t, 0.35)
+	_attack_cd = maxf(_attack_cd, 0.45)
 
 
 func _end_lunge(hit: bool, blocked: bool) -> void:

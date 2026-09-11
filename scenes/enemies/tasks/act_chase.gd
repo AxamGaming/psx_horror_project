@@ -9,6 +9,13 @@ extends BTAction
 ## Returns RUNNING always (BTDynamicSelector above re-tests CondSeesPlayer each
 ## tick and aborts when the lock window expires and LOS is gone).
 
+var _at_standoff: bool = false
+
+
+func _enter() -> void:
+	_at_standoff = false
+
+
 func _tick(_delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
@@ -23,7 +30,18 @@ func _tick(_delta: float) -> Status:
 		if (cre.player_pos() - cre.global_position).length() < cre.sight_range:
 			target = cre.player_pos()
 
-	if cre.dist_to_player() <= cre.attack_standoff:
+	# R19 hysteresis: at point-blank the distance oscillates around the
+	# standoff radius (depenetration pushes, knockback, player kiting), and
+	# the hard <= test flipped stop+battle_idle <-> run+Run EVERY TICK —
+	# visibly flickering animations. Enter standoff at 1.35 m, leave only
+	# past 1.70 m.
+	var d: float = cre.dist_to_player()
+	if _at_standoff:
+		if d > cre.attack_standoff + 0.35:
+			_at_standoff = false
+	elif d <= cre.attack_standoff:
+		_at_standoff = true
+	if _at_standoff:
 		cre.stop_move()
 		cre.play_anim(cre.anim_battle_idle)
 	else:

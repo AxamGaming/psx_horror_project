@@ -40,9 +40,10 @@ enum Gait { IDLE, WALK, SPRINT, CROUCH }
 @export var allow_jump: bool = true
 @export var jump_speed: float = 4.2
 
-@export_group("Debug Fly (F = noclip free-flight)")
-## WASD moves along the camera axes, SPACE rises, C/CTRL descends, SHIFT
-## boosts. Collision mask drops to 0 (true noclip — you can hover inside the
+@export_group("Debug Fly (debug_fly action = noclip free-flight)")
+## Bound to the "debug_fly" input action (G in this project — flashlight
+## keeps F; rebind freely in Project Settings -> Input Map). WASD moves along
+## the camera axes, SPACE rises, C/CTRL descends, SHIFT boosts. Collision mask drops to 0 (true noclip — you can hover inside the
 ## level geometry), footsteps/gait/noise go silent so the creature ignores you,
 ## and stamina does not drain. Press F again (or die) to restore normal body.
 @export var fly_speed: float = 8.0
@@ -218,7 +219,7 @@ func _toggle_fly() -> void:
 		collision_mask = 0          # true noclip: collide with nothing
 		velocity = Vector3.ZERO
 		_wall_cd = 999.0            # no wall-slam thud on re-entry frames
-		print("DEBUG FLY: ON  (WASD move, SPACE up, C/CTRL down, SHIFT boost, F exits)")
+		print("DEBUG FLY: ON  (WASD move, SPACE up, C/CTRL down, SHIFT boost, toggle key exits)")
 
 
 func _exit_fly() -> void:

@@ -449,3 +449,43 @@ actual bones** via BoneAttachment3D, built at runtime in
 - Playtest: 27/27 assertions × 3 runs with this exact config, incl. doorway
   passage (0.07 m lintel clearance), barrel squeeze transit, Stage hops,
   door-blade pocket; max continuous pinned 1.6–2.3 s (P11).
+
+---
+
+# R21 — residual head/hand wall-clipping (owner screenshots from outside the hall)
+
+## Why it still clipped with the R20.1 hull (three mechanisms, all visible in
+## the owner's screenshots)
+1. **Rooted windups sweep limbs through walls.** During the windup the body is
+   deliberately rooted (zero velocity — R19 fix), so move_and_slide never runs
+   a depenetration for the shapes the ATTACK ANIMATION drives forward: the
+   skull thrust and the arm sweep pass through the wall and stay there until
+   the swing ends. This is what the screenshots caught (head + hand buried
+   mid-swing).
+2. **The snout overhang was still ~0.1 m past the muzzle sphere** (the
+   owner's own original head-matched collider implied a visual snout tip at
+   z≈-1.30; coverage ended at -1.22).
+3. **Forearms had no collider at all** — the long lateral bones clip when the
+   creature walks flush along a wall or swings near a corner.
+
+## Fixes
+- **Wall-aware swing pivot**: while winding, if swing-reach geometry (rays at
+  1.1 m + 1.6 m, reach 1.35 m) is dead ahead, the body pivots ~55 deg toward
+  the clearer side before swinging — the sweep travels ALONG the wall instead
+  of through it. Hits are distance-based, so connects are unaffected; it only
+  aims the visuals. If both sides are blocked (cornered) it keeps the
+  player-facing swing rather than turning its back.
+- **Muzzle sphere** r 0.16 -> 0.18, centre z -1.06 -> -1.12 (tip -1.30,
+  matches the measured visual snout; top stays 1.73, lintel-safe).
+- **Forearm spheres** on Bottom_arm.L/R, r=0.10 at (+/-0.62, 1.30, -0.10),
+  export `hull_forearms` (default on). Hull width 1.44 m.
+- **PropBarrel2 sunk a further 16 cm into the west wall** (x -0.944 -> -1.10)
+  so the north-corridor squeeze keeps a ~0.24 m alignment window with the
+  wider hull.
+- Hull is now 7 bone-attached pieces (skull, muzzle, neck, 2 hands,
+  2 forearms); all logged at spawn via HULL lines.
+
+## Validation
+27/27 assertions x3 runs + fly 5/5 with the 7-piece hull: doorway passage
+(0.07 m lintel clearance), barrel-squeeze transit, Stage hops, door-blade
+pocket unwedge, downed crawl poses; P11 max pinned 1.6 s.

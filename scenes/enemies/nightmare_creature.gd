@@ -54,7 +54,7 @@ class_name NightmareCreature
 ##   ├─ DynSeq [ CondHasAlert, ActInvestigate ]
 ##   └─ ActPatrol
 ## ============================================================================
-const BUILD_TAG := "R20"
+const BUILD_TAG := "R22"
 const LOG_PATH  := "user://creature_log.txt"
 
 @export_group("AI")
@@ -127,6 +127,10 @@ const LOG_PATH  := "user://creature_log.txt"
 ## alignment window (was 0.107 m at r=0.13). Expect the fingertips to still
 ## graze walls occasionally — that is the physical limit of this corridor.
 @export var hull_hands: bool = true
+## Forearms/elbows (the long lateral bones that clip when walking flush along
+## a wall). Widens the hull to 1.44 m — the north-corridor barrel was sunk a
+## further 16 cm into the west wall to keep the squeeze window ~0.24 m.
+@export var hull_forearms: bool = true
 
 @export_group("Debug")
 @export var debug_beacon: bool = true
@@ -228,6 +232,14 @@ var _anim_map: Dictionary = {}
 # ── 2.5D audio ────────────────────────────────────────────────────────────────
 var _voices: Array[AudioStreamPlayer] = []
 var _pan_fx: Array[AudioEffectPanner] = []
+
+# ── R22: per-frame hull tracking (bone-world → CharacterBody3D local) ──────────
+## Each entry: { col: CollisionShape3D, skel: Skeleton3D, bone_idx: int,
+##               local_offset: Vector3, radius: float }
+## _hull_pieces lives directly under CharacterBody3D so move_and_slide()
+## finds them instantly.  We write col.global_transform each frame so the
+## shape is always where the animated bone actually is.
+var _hull_pieces: Array = []
 
 # ── Dwell sweep (investigate) ─────────────────────────────────────────────────
 var _sweep_t: float = 0.0
@@ -923,6 +935,12 @@ func _physics_process(delta: float) -> void:
 			and dist_to_player() < proximity_range:
 		_wake(player_pos())
 
+	# ── R22: sync hull spheres to animated bone positions BEFORE physics ─────
+	# This runs before move_and_slide() so the physics server uses the
+	# current-frame bone positions, not last frame's (the one-frame lag that
+	# caused visible clipping in R20/R21).
+	_update_hull_transforms()
+
 	# ── Tick sub-controllers BEFORE move_and_slide ────────────────────────────
 	if awareness != null:
 		awareness.tick(delta)
@@ -1246,6 +1264,44 @@ func _try_step_assist(delta: float) -> void:
 	_log("STEP HOP dh=%.2f" % dh)
 
 
+# ── R21: wall-aware swing pivot ──────────────────────────────────────────────
+## While winding up against a wall, the rooted body cannot resolve the arm/
+## head sweep that the attack animation drives THROUGH the wall (rooted =
+## zero velocity = move_and_slide never depenetrates the bone-driven shapes).
+## So before swinging, if swing-reach geometry is dead ahead, pivot ~55 deg
+## toward the clearer side — the sweep then travels ALONG the wall. Hits are
+## distance-based, so this never costs a connect; it only aims the visuals.
+
+func _clear_dist(dir: Vector3, reach: float) -> float:
+	var world: World3D = get_world_3d()
+	if world == null or world.direct_space_state == null:
+		return reach
+	var best: float = reach
+	for h in [1.1, 1.6]:
+		var from: Vector3 = global_position + Vector3(0.0, h, 0.0)
+		var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+				from, from + dir * reach)
+		q.exclude = [get_rid()]
+		q.collision_mask = 17
+		var hit: Dictionary = world.direct_space_state.intersect_ray(q)
+		if not hit.is_empty():
+			best = minf(best, global_position.distance_to(hit["position"]))
+	return best
+
+
+func _swing_yaw_adjust(yaw: float) -> float:
+	var f := Vector3(-sin(yaw), 0.0, -cos(yaw))
+	if _clear_dist(f, 1.35) > 1.25:
+		return yaw                      # swing lane is open, aim true
+	var yl := yaw + deg_to_rad(55.0)
+	var yr := yaw - deg_to_rad(55.0)
+	var cl := _clear_dist(Vector3(-sin(yl), 0.0, -cos(yl)), 1.35)
+	var cr := _clear_dist(Vector3(-sin(yr), 0.0, -cos(yr)), 1.35)
+	if maxf(cl, cr) < 0.7:
+		return yaw                      # cornered both sides: keep player aim
+	return yl if cl >= cr else yr
+
+
 # ── Investigate dwell sweep ────────────────────────────────────────────────────
 
 func turn_slow(delta: float) -> void:
@@ -1329,10 +1385,29 @@ func _find_skeleton(n: Node) -> Skeleton3D:
 	return null
 
 
-## R20: bone-attached convex hull pieces (see the export group docs).
-## Rest centres are in CREATURE-BODY space (forward = -Z), measured from the
-## bind pose; each sphere keeps that offset relative to its bone forever, so
-## the hull tracks walk bobs, roars, crawl poses, everything.
+## R22: bone-tracked convex hull pieces — direct children of CharacterBody3D.
+##
+## Previous approach (R20/R21): BoneAttachment3D + CollisionShape3D nested inside
+## Skeleton3D. Root cause of the still-clipping bug:
+##   1. BoneAttachment3D had NOT yet executed its first _process() when
+##      _build_detailed_hull() placed col.position at _ready() time, so the
+##      attachment's bone transform wasn't synced yet.
+##   2. More critically, CollisionShape3D nodes parented to a BoneAttachment3D
+##      that lives INSIDE a Skeleton3D get their global_transform driven by
+##      Godot's BoneAttachment tick — but CharacterBody3D.move_and_slide()
+##      uses the PHYSICS SERVER's cached global transform, which lags by one
+##      frame when the attachment is updated in _process() (not _physics_process).
+##      The result: the physics body saw the shapes at their PREVIOUS frame's
+##      position, not where the bone was this frame — one-frame lag = visible
+##      clipping on fast-moving bones (run, lunge, roar).
+##
+## R22 fix: CollisionShape3D nodes sit DIRECTLY under CharacterBody3D.
+## Their global_transform is written in _physics_process() BEFORE
+## move_and_slide() runs (via _update_hull_transforms()), so the physics
+## server always sees them at the exact same-frame bone position.
+## The HeadHitbox Area3D is now updated the same way (separate call).
+##
+## Piece table: [bone-name prefix, radius, rest offset in body-space (-Z fwd)]
 func _build_detailed_hull() -> void:
 	if not hull_enabled:
 		return
@@ -1340,26 +1415,28 @@ func _build_detailed_hull() -> void:
 	if skel == null:
 		_log("HULL: no skeleton found - capsule-only fallback")
 		return
-	# [bone-name prefix, radius, rest centre in body space]
+
 	var pieces: Array = []
 	if hull_head:
-		# Skull, plus a muzzle sphere on the Jaw bone: the visible snout/jaw
-		# extends ~0.25 m past a single skull sphere — that overhang was the
-		# "head goes through walls a bit" the owner reported.
 		pieces.append(["Head_", 0.24, Vector3(-0.08, 1.69, -0.95)])
-		pieces.append(["Jaw_0", 0.16, Vector3(-0.08, 1.57, -1.06)])
+		pieces.append(["Jaw_0", 0.18, Vector3(-0.08, 1.55, -1.12)])
 	if hull_neck:
 		pieces.append(["spine_5", 0.26, Vector3(-0.06, 1.62, -0.55)])
 	if hull_hands:
-		# r=0.10, centres 2 cm inward and dropped onto the finger mass.
 		pieces.append(["Hand.L", 0.10, Vector3(-0.56, 1.10, -0.60)])
 		pieces.append(["Hand.R", 0.10, Vector3(0.56, 1.10, -0.60)])
-	var head_att: BoneAttachment3D = null
+	if hull_forearms:
+		pieces.append(["Bottom_arm.L", 0.10, Vector3(-0.62, 1.30, -0.10)])
+		pieces.append(["Bottom_arm.R", 0.10, Vector3(0.62, 1.30, -0.10)])
+
+	var head_bone_idx: int = -1
+
 	for piece in pieces:
 		var prefix: String = piece[0]
-		var radius: float = piece[1]
-		var centre_body: Vector3 = piece[2]
-		var bone_idx: int = -1
+		var radius: float  = piece[1]
+		var body_offset: Vector3 = piece[2]   # in CharacterBody3D local space
+
+		var bone_idx: int  = -1
 		var bone_full: String = ""
 		for i in range(skel.get_bone_count()):
 			var bn: String = skel.get_bone_name(i)
@@ -1370,34 +1447,83 @@ func _build_detailed_hull() -> void:
 		if bone_idx < 0:
 			_log("HULL: bone '%s*' missing - piece skipped" % prefix)
 			continue
-		var att: BoneAttachment3D = BoneAttachment3D.new()
-		att.name = "Hull_" + bone_full.replace(".", "_")
-		att.bone_name = bone_full
-		skel.add_child(att)
+
 		var sph: SphereShape3D = SphereShape3D.new()
 		sph.radius = radius
+
 		var col: CollisionShape3D = CollisionShape3D.new()
+		col.name = "HullSphere_" + bone_full.replace(".", "_")
 		col.shape = sph
-		# Place the sphere at the measured rest centre, expressed in the
-		# attachment's bone space (spheres are rotation-invariant).
-		var att_world: Transform3D = skel.global_transform * skel.get_bone_global_pose(bone_idx)
-		col.position = att_world.affine_inverse() * to_global(centre_body)
-		att.add_child(col)
-		var top: float = centre_body.y + radius
+		add_child(col)   # direct child of CharacterBody3D — move_and_slide sees it immediately
+
+		# Store the per-frame update recipe.
+		_hull_pieces.append({
+			"col":        col,
+			"skel":       skel,
+			"bone_idx":   bone_idx,
+			# body_offset is in creature body space (ModelRoot is 180° flipped).
+			# The body-space → world conversion is: creature.global_transform * body_offset.
+			# Each frame we override col.global_transform so the shape is exactly
+			# at the bone's animated world position.
+			"body_offset": body_offset,
+			"radius":     radius,
+		})
+
+		var top: float = body_offset.y + radius
 		_log("HULL %s r=%.2f rest=(%.2f,%.2f,%.2f) top=%.2f" % [
-			bone_full, radius, centre_body.x, centre_body.y, centre_body.z, top])
+			bone_full, radius, body_offset.x, body_offset.y, body_offset.z, top])
+
 		if prefix == "Head_":
-			head_att = att
-	# The shootable head hitbox rides the head bone too, so pellets track the
-	# animated skull instead of a fixed point.
-	if head_att != null:
-		var hb: Node = get_node_or_null("HeadHitbox")
-		if hb != null:
-			var hw: Transform3D = hb.global_transform
-			hb.get_parent().remove_child(hb)
-			head_att.add_child(hb)
-			hb.global_transform = hw
-			_log("HULL: HeadHitbox reparented onto Head bone")
+			head_bone_idx = bone_idx
+
+	# HeadHitbox: reparent from CharacterBody3D root onto a tracked entry so
+	# it follows the skull bone each physics frame.
+	var hb: Node = get_node_or_null("HeadHitbox")
+	if hb != null and head_bone_idx >= 0:
+		# Store bone info on the hitbox node directly — simpler than a separate array.
+		hb.set_meta("hull_skel",     skel)
+		hb.set_meta("hull_bone_idx", head_bone_idx)
+		# body-space offset: same as the skull sphere centre
+		hb.set_meta("hull_body_offset", Vector3(-0.08, 1.69, -0.95))
+		_log("HULL: HeadHitbox will track Head bone (R22 per-frame)")
+	elif hb != null:
+		_log("HULL: HeadHitbox kept at fixed position (head bone not found)")
+
+
+## Called at the TOP of _physics_process, before move_and_slide().
+## Writes the global_transform of every tracked hull sphere to match
+## the bone's current animated world position.  Because this runs in
+## _physics_process (not _process), it is synchronous with the physics
+## tick and the physics server sees the correct transforms immediately.
+func _update_hull_transforms() -> void:
+	for entry in _hull_pieces:
+		var col: CollisionShape3D = entry["col"]
+		var skel: Skeleton3D      = entry["skel"]
+		var bone_idx: int         = entry["bone_idx"]
+		var body_offset: Vector3  = entry["body_offset"]
+
+		# Bone world transform from the skeleton (this frame's pose, updated
+		# by Skeleton3D before _physics_process runs).
+		var bone_world: Transform3D = skel.global_transform * skel.get_bone_global_pose(bone_idx)
+
+		# The sphere centre in world space = creature body position + body_offset
+		# rotated by the creature's own yaw.  We do NOT parent through the bone
+		# rotation because sphere shapes are rotation-invariant and using the
+		# bone's rotation would just add confusion with no benefit.
+		var world_centre: Vector3 = to_global(body_offset)
+
+		# Override the CollisionShape3D global transform directly.
+		# Godot 4's physics server reads global_transform, not local position,
+		# when the shape's PhysicsBody parent is a CharacterBody3D.
+		col.global_transform = Transform3D(Basis.IDENTITY, world_centre)
+
+	# Update HeadHitbox to track the skull bone.
+	var hb: Node3D = get_node_or_null("HeadHitbox") as Node3D
+	if hb != null and hb.has_meta("hull_skel"):
+		var body_offset: Vector3 = hb.get_meta("hull_body_offset")
+		hb.global_transform = Transform3D(
+			hb.global_transform.basis,   # keep the hitbox's own orientation
+			to_global(body_offset))
 
 
 func _find_anim(n: Node) -> AnimationPlayer:

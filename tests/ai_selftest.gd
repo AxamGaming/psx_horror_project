@@ -66,6 +66,8 @@ var _p7_feed: bool = false
 var _p7_eat: bool = false
 var _p8_notfeed: bool = false
 var _p8_walk: bool = false
+var _p11_stall_t: float = 0.0      # continuous non-prowl pinned time
+var _p11_max_stall: float = 0.0
 var _p9_violations: int = 0        # frames with commanded velocity while winding
 var _p10_flips: int = 0            # anim switches observed at point-blank
 var _p10_zone_t: float = 0.0       # time spent at point-blank (awake, combat)
@@ -141,6 +143,13 @@ func _process(delta: float) -> bool:
 		var hv: Vector3 = _cre.velocity
 		if Vector2(hv.x, hv.z).length() > 0.05:
 			_p9_violations += 1
+	# P11: new-hull snag monitor — uses the navigator's own pinned timer, which
+	# accumulates ONLY while movement is commanded but the body isn't moving
+	# (prowl excluded). Intentional standing (investigate dwell, wake roar,
+	# point-blank standoff, windups) does NOT count — those deactivate travel.
+	var navn: Node = _cre.get("nav")
+	if navn != null:
+		_p11_max_stall = maxf(_p11_max_stall, float(navn.get("_pinned_t")))
 	# P10: anim flip rate while fighting at point-blank (standoff flapping).
 	if anim != "":
 		var awake_c: bool = bool(st.get("awake", false)) and not bool(st.get("neutralized", false))
@@ -365,6 +374,9 @@ func _report() -> void:
 	var p9ok: bool = _p9_violations == 0
 	_results.append(("PASS" if p9ok else "FAIL") + \
 			" P9 windups are rooted — no skating swings (violations=%d)" % _p9_violations)
+	var p11ok: bool = _p11_max_stall < 4.0
+	_results.append(("PASS" if p11ok else "FAIL") + \
+			" P11 no long stalls anywhere (max continuous pinned %.1fs, want < 4)" % _p11_max_stall)
 	var flip_rate: float = _p10_flips / maxf(_p10_zone_t, 0.001)
 	var p10ok: bool = flip_rate < 5.0
 	_results.append(("PASS" if p10ok else "FAIL") + \

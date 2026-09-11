@@ -12,7 +12,7 @@ radius = 0.45
 height = 1.9
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_head"]
-radius = 0.32
+radius = 0.13227703
 
 [sub_resource type="BlackboardPlan" id="BlackboardPlan_og0ql"]
 
@@ -34,13 +34,14 @@ script = ExtResource("1_script")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="HeadHitbox" type="Area3D" parent="."]
+[node name="HeadHitbox" type="Area3D" parent="." unique_id=1446205332]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.088463426, 1.7185364, -0.99742234)
 collision_layer = 2
 collision_mask = 0
 monitoring = false
 
-[node name="Col" type="CollisionShape3D" parent="HeadHitbox"]
+[node name="Col" type="CollisionShape3D" parent="HeadHitbox" unique_id=1265278060]
+transform = Transform3D(2.525, 0, 0, 0, 2.525, 0, 0, 0, 2.525, -0.032053173, -0.08687985, -0.18023491)
 shape = SubResource("SphereShape3D_head")
 
 [node name="BTPlayer" type="BTPlayer" parent="." unique_id=1250169341]

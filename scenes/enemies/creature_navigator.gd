@@ -344,20 +344,23 @@ func tick(delta: float) -> void:
 	# Per-frame retarget is cheap; the 10 Hz throttle stalled the path for
 	# 1-3 frames and re-introduced the R16/R17 crawl.
 	var snapped_target: Vector3 = _target
-	if not _nav.is_target_reachable():
+	# R20: reachability comes from the AGENT, not from "did the snap move the
+	# goal". The old heuristic lied for cross-island targets that sit ON the
+	# navmesh (player south of the crawlspace): the closest point IS the
+	# target, so snapped==target read as "reachable" and the creature
+	# face-planted the tunnel lip for 15 s (playtest log: pos=(-0.13,-0.45)
+	# dir=(0,1) onwall=true reach=true, unstick cycle -> giveup -> repeat).
+	_nav_reachable = _nav.is_target_reachable()
+	if not _nav_reachable:
 		var snap: Vector3 = NavigationServer3D.map_get_closest_point(
 				_nav.get_navigation_map(), _target)
-		# R16: ALWAYS snap to the closest reachable point (the old < 3 m gate
-		# rejected the snap for far-off targets like the player holed up in the
-		# spawn room — which left _nav_reachable stuck TRUE, no prowl, and the
-		# creature body-checking the crawlspace mouth forever). Walking to the
-		# best-effort point and prowling there is strictly better than ramming.
+		# R16: ALWAYS snap to the closest point (the old < 3 m gate rejected
+		# far targets and bypassed the whole give-up/prowl machinery).
 		if snap.is_finite():
 			snapped_target = snap
 	_nav_goal = snapped_target
 	_nav_snapped = snapped_target.distance_squared_to(_target) > 0.01
 	_nav.target_position = snapped_target
-	_nav_reachable = not _nav_snapped
 
 	# ── Prowl: unreachable goal AND standing at the closest reachable point ──
 	# The orbit centre is the END OF THE PARTIAL PATH (the closest reachable
@@ -365,8 +368,20 @@ func tick(delta: float) -> void:
 	# (player holed up in the spawn room), _nav_goal can be 10 m away while the
 	# body is already parked at the crawlspace mouth where the path ends.
 	if not _nav_reachable:
-		if _path_end_valid:
+		var cpos2: Vector3 = _creature.global_position
+		if _path_end_valid and _path_end.distance_to(cpos2) > 0.5:
 			_prowl_center = _path_end
+		else:
+			# Path collapsed to the agent's feet (it is parked AT the end of
+			# the partial path): orbit a virtual point 1.2 m toward the goal
+			# so the creature circles/scanfaces the hole instead of spinning
+			# on its own axis.
+			var tg: Vector3 = _nav_goal - cpos2
+			tg.y = 0.0
+			if tg.length_squared() > 0.01:
+				_prowl_center = cpos2 + tg.normalized() * 1.2
+			else:
+				_prowl_center = cpos2 + Vector3(0.0, 0.0, -1.2)
 	else:
 		_prowl_center = _nav_goal
 	var to_goal: Vector3 = _prowl_center - _creature.global_position
@@ -555,12 +570,19 @@ func _clear_path(dir: Vector3, dist: float) -> bool:
 		return true
 	# R16: knee height, not chest height — a 0.7 m ray flew OVER the 0.4 m
 	# Stage and the steering fallback body-checked it forever.
-	var from: Vector3 = _creature.global_position + Vector3(0.0, 0.3, 0.0)
-	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-			from, from + dir * dist)
-	q.exclude = [_creature.get_rid()]
-	q.collision_mask = 17
-	return world.direct_space_state.intersect_ray(q).is_empty()
+	# R20: ALSO a shoulder-height ray — the knee ray alone passes UNDER the
+	# 1.15 m crawlspace ceiling while the 1.9 m body cannot, which parked the
+	# creature against the tunnel lip. Both rays must be clear. (1.6 still
+	# fits every 2.0 m doorway lintel.)
+	for h in [0.3, 1.6]:
+		var from: Vector3 = _creature.global_position + Vector3(0.0, h, 0.0)
+		var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+				from, from + dir * dist)
+		q.exclude = [_creature.get_rid()]
+		q.collision_mask = 17
+		if not world.direct_space_state.intersect_ray(q).is_empty():
+			return false
+	return true
 
 
 func _forward_collider(dist: float) -> Node:

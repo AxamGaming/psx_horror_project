@@ -382,3 +382,70 @@ New continuous harness detectors (run over the WHOLE scenario, not windows):
   stay < 5/s (flapping measured ~0.5/s post-fix; the bug regime is ~30/s).
 
 Validation: ai_selftest 26/26 × 3 runs, fly_selftest 5/5, import clean.
+
+---
+
+# R20 — hull accuracy + the crawlspace-lip wall-stare (from playtest log)
+
+## "Faces the wall, rotates, glitches, then sorts itself out"
+Captured red-handed in STEERDBG: 15 s pinned at the crawlspace mouth
+(`pos=(-0.13,-0.45) dir=(0,1) onwall=true reach=true tgt=(-0.13,3.58)`)
+while the player crouched SOUTH of the tunnel. Three stacked bugs:
+1. **Cross-island reachability lie**: when the target sits ON navmesh but on a
+   disconnected island, `map_get_closest_point` returns the target itself →
+   `snapped == target` → the old `_nav_reachable = not snapped` heuristic said
+   "reachable" → no prowl, just face-plant the lip. Reachability now comes
+   from the agent's own `is_target_reachable()`.
+2. **Knee-height rays pass UNDER low ceilings**: the 0.3 m "lane clear" ray
+   flew under the 1.15 m crawlspace slab while the 1.9 m body could not.
+   `clear_path` (navigator + lunge gate) now casts **two** rays: 0.3 m (low
+   obstacles — Stage) and 1.6 m (overhangs — still fits 2.0 m lintels).
+3. **Prowl spin-in-place**: when the partial path collapses to the agent's
+   feet, the orbit centre is now a virtual point 1.2 m toward the goal — the
+   creature circles/scan-faces the hole instead of pirouetting on its axis.
+
+## Body parts clipping through walls → bone-attached convex hull
+A **trimesh is not an option** on a CharacterBody3D: Godot refuses concave
+shapes for character movement (they're static/area-only), and a skinned-mesh
+trimesh can't follow bones without re-baking every frame. The standard
+animated-character answer is implemented instead: **convex spheres riding the
+actual bones** via BoneAttachment3D, built at runtime in
+`_build_detailed_hull()` (no fragile .tscn paths into the GLB):
+- `Head_015` sphere r=0.22 at the measured skull centre (rest top y=1.90)
+- `spine_5` sphere r=0.26 covering the hunched neck/upper chest (top 1.88)
+- `Hand.L/R` spheres r=0.13 — **exported but OFF by default**: hands widen
+  the hull to 1.42 m and the 1.8 m corridor's barrel squeeze would become
+  impassable. Enable per-level if your geometry is roomy.
+- The shootable `HeadHitbox` area is reparented onto the head bone, so
+  pellets track the animated skull instead of a fixed point.
+- Every piece is logged at spawn (`HULL ...` lines with rest position + top
+  height) so misplacement is visible in creature_log.txt immediately.
+- Inspector toggles on the creature: `hull_enabled`, `hull_head`,
+  `hull_neck`, `hull_hands`.
+
+## Playtesting (as requested — colliders in wrong places is the classic fail)
+- New continuous detector **P11**: navigator `_pinned_t` peak over the whole
+  scenario < 4 s (it counts ONLY commanded-but-not-moving; dwells/roars/
+  windups don't count). Result: **max 1.6–2.3 s** across 3 runs — the tight
+  spots (doorway lintel with 0.10 m head clearance, open-door blade pocket,
+  barrel squeeze, Stage hops, crawlspace mouth) all clear without the hull
+  catching. The user's log had a 15 s pin; pre-R17 sessions had worse.
+- Full suite: 27/27 × 3 runs, fly 5/5, import clean.
+- `tests/_inspect_skeleton.gd`: dev probe that dumps bone names + rest
+  positions in body space (used to place the hull pieces; keep for future
+  hull tuning).
+- BUILD_TAG bumped to **R20** so future logs self-identify.
+
+### R20.1 — hull tuning (owner playtest: "hands and head still clip a bit")
+- Hands ship **ON** by default now, shrunk to **r=0.10** and pulled 2 cm
+  inward (±0.56) onto the finger mass → the corridor barrel-squeeze alignment
+  window grows from ~0.107 m to ~0.21 m. (Owner accepted that fingertips may
+  still graze walls in the 1.8 m corridor — physical limit of that gap.)
+- **New muzzle sphere** on the Jaw bone (r=0.16 @ y1.57, z−1.06, top 1.73):
+  the visible snout/jaw extends ~0.25 m past a single skull sphere — that
+  overhang was the residual head clipping.
+- Skull sphere 0.22 → **0.24** (rest top 1.93 — the lintel budget limit with
+  walk-bob margin; doorways re-tested 3/3 runs).
+- Playtest: 27/27 assertions × 3 runs with this exact config, incl. doorway
+  passage (0.07 m lintel clearance), barrel squeeze transit, Stage hops,
+  door-blade pocket; max continuous pinned 1.6–2.3 s (P11).

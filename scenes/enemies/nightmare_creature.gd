@@ -54,7 +54,7 @@ class_name NightmareCreature
 ##   ├─ DynSeq [ CondHasAlert, ActInvestigate ]
 ##   └─ ActPatrol
 ## ============================================================================
-const BUILD_TAG := "R16"
+const BUILD_TAG := "R20"
 const LOG_PATH  := "user://creature_log.txt"
 
 @export_group("AI")
@@ -102,6 +102,31 @@ const LOG_PATH  := "user://creature_log.txt"
 
 @export_group("Feeding (player-death sequence)")
 @export var feed_speed: float = 1.6
+
+@export_group("Detailed hull (bone-attached colliders)")
+## The capsule alone let the forward-snouted skull, the hunched neck and the
+## resting hands clip through walls — "certain body parts go through stuff".
+## R20 adds CONVEX SPHERE pieces riding the actual bones (BoneAttachment3D),
+## so the collision hull follows the pose: the head collider is where the
+## animated head actually is, in every animation.
+## NOTE: a trimesh (concave) collider is NOT an option on a CharacterBody3D
+## in Godot — concave shapes don't participate in character movement, and a
+## skinned-mesh trimesh would need re-baking every frame. Bone-attached
+## spheres are the standard animated-character approach: they slide cleanly
+## against geometry instead of hooking on edges.
+## R20.1 piece set (rest tops, all under the 2.0 m lintels with margin for
+## the walk bob): skull r=0.24 top 1.93, MUZZLE r=0.16 top 1.73 (the jaw/
+## snout mass that still clipped walls with a single skull sphere), neck
+## r=0.26 top 1.88, hands r=0.10 top 1.20. Startup log prints each piece
+## ("HULL ..." lines) with its rest position and top height.
+@export var hull_enabled: bool = true
+@export var hull_head: bool = true
+@export var hull_neck: bool = true
+## R20.1: hands ship ON at the owner's request, shrunk to r=0.10 and pulled
+## 2 cm inward so the 1.8 m corridor's barrel squeeze keeps a ~0.21 m
+## alignment window (was 0.107 m at r=0.13). Expect the fingertips to still
+## graze walls occasionally — that is the physical limit of this corridor.
+@export var hull_hands: bool = true
 
 @export_group("Debug")
 @export var debug_beacon: bool = true
@@ -325,6 +350,7 @@ func _ready() -> void:
 
 	_logf = FileAccess.open(LOG_PATH, FileAccess.WRITE)
 	_log("=== spawn build=%s pos=%s" % [BUILD_TAG, str(global_position)])
+	_build_detailed_hull()   # after the log is open so HULL lines are captured
 	_err_logger = CreatureErrorLogger.new()
 	OS.add_logger(_err_logger)
 	print("R16 SELFTEST _log_message path")
@@ -669,12 +695,18 @@ func clear_path(dir: Vector3, dist: float) -> bool:
 	var world: World3D = get_world_3d()
 	if world == null or world.direct_space_state == null:
 		return true
-	var from: Vector3 = global_position + Vector3(0.0, 0.3, 0.0)
-	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-			from, from + dir * dist)
-	q.exclude = [get_rid()]
-	q.collision_mask = 17
-	return world.direct_space_state.intersect_ray(q).is_empty()
+	# R20: knee AND shoulder height — a 0.3 m ray alone passes under the
+	# 1.15 m crawlspace ceiling, so lunges used to be "clear" into the tunnel
+	# lip. 1.6 m still fits every 2.0 m lintel.
+	for h in [0.3, 1.6]:
+		var from: Vector3 = global_position + Vector3(0.0, h, 0.0)
+		var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+				from, from + dir * dist)
+		q.exclude = [get_rid()]
+		q.collision_mask = 17
+		if not world.direct_space_state.intersect_ray(q).is_empty():
+			return false
+	return true
 
 
 ## Walkable point near `around` for investigation search points.
@@ -1285,6 +1317,88 @@ func debug_state() -> Dictionary:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Animation helpers
 # ═══════════════════════════════════════════════════════════════════════════════
+
+func _find_skeleton(n: Node) -> Skeleton3D:
+	for c in n.get_children():
+		var sk: Skeleton3D = c as Skeleton3D
+		if sk != null:
+			return sk
+		var r: Skeleton3D = _find_skeleton(c)
+		if r != null:
+			return r
+	return null
+
+
+## R20: bone-attached convex hull pieces (see the export group docs).
+## Rest centres are in CREATURE-BODY space (forward = -Z), measured from the
+## bind pose; each sphere keeps that offset relative to its bone forever, so
+## the hull tracks walk bobs, roars, crawl poses, everything.
+func _build_detailed_hull() -> void:
+	if not hull_enabled:
+		return
+	var skel: Skeleton3D = _find_skeleton(self)
+	if skel == null:
+		_log("HULL: no skeleton found - capsule-only fallback")
+		return
+	# [bone-name prefix, radius, rest centre in body space]
+	var pieces: Array = []
+	if hull_head:
+		# Skull, plus a muzzle sphere on the Jaw bone: the visible snout/jaw
+		# extends ~0.25 m past a single skull sphere — that overhang was the
+		# "head goes through walls a bit" the owner reported.
+		pieces.append(["Head_", 0.24, Vector3(-0.08, 1.69, -0.95)])
+		pieces.append(["Jaw_0", 0.16, Vector3(-0.08, 1.57, -1.06)])
+	if hull_neck:
+		pieces.append(["spine_5", 0.26, Vector3(-0.06, 1.62, -0.55)])
+	if hull_hands:
+		# r=0.10, centres 2 cm inward and dropped onto the finger mass.
+		pieces.append(["Hand.L", 0.10, Vector3(-0.56, 1.10, -0.60)])
+		pieces.append(["Hand.R", 0.10, Vector3(0.56, 1.10, -0.60)])
+	var head_att: BoneAttachment3D = null
+	for piece in pieces:
+		var prefix: String = piece[0]
+		var radius: float = piece[1]
+		var centre_body: Vector3 = piece[2]
+		var bone_idx: int = -1
+		var bone_full: String = ""
+		for i in range(skel.get_bone_count()):
+			var bn: String = skel.get_bone_name(i)
+			if bn.begins_with(prefix):
+				bone_idx = i
+				bone_full = bn
+				break
+		if bone_idx < 0:
+			_log("HULL: bone '%s*' missing - piece skipped" % prefix)
+			continue
+		var att: BoneAttachment3D = BoneAttachment3D.new()
+		att.name = "Hull_" + bone_full.replace(".", "_")
+		att.bone_name = bone_full
+		skel.add_child(att)
+		var sph: SphereShape3D = SphereShape3D.new()
+		sph.radius = radius
+		var col: CollisionShape3D = CollisionShape3D.new()
+		col.shape = sph
+		# Place the sphere at the measured rest centre, expressed in the
+		# attachment's bone space (spheres are rotation-invariant).
+		var att_world: Transform3D = skel.global_transform * skel.get_bone_global_pose(bone_idx)
+		col.position = att_world.affine_inverse() * to_global(centre_body)
+		att.add_child(col)
+		var top: float = centre_body.y + radius
+		_log("HULL %s r=%.2f rest=(%.2f,%.2f,%.2f) top=%.2f" % [
+			bone_full, radius, centre_body.x, centre_body.y, centre_body.z, top])
+		if prefix == "Head_":
+			head_att = att
+	# The shootable head hitbox rides the head bone too, so pellets track the
+	# animated skull instead of a fixed point.
+	if head_att != null:
+		var hb: Node = get_node_or_null("HeadHitbox")
+		if hb != null:
+			var hw: Transform3D = hb.global_transform
+			hb.get_parent().remove_child(hb)
+			head_att.add_child(hb)
+			hb.global_transform = hw
+			_log("HULL: HeadHitbox reparented onto Head bone")
+
 
 func _find_anim(n: Node) -> AnimationPlayer:
 	for c in n.get_children():

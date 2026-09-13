@@ -260,6 +260,13 @@ var _hull_pieces: Array = []
 
 # ── Dwell sweep (investigate) ─────────────────────────────────────────────────
 var _sweep_t: float = 0.0
+
+# ── R26 jumpscare hold ────────────────────────────────────────────────────────
+## Set by JumpscareDirector for the duration of the scare. While held:
+## locomotion, BT and the per-frame anim selector are frozen (so the roar pose
+## written once by the JumpscareAnim track persists), feeding never starts,
+## and the body stands its ground in front of the kill camera.
+var jumpscare_hold: bool = false
 var _sweep_gap: float = 999.0
 var _sweep_center: float = 0.0
 
@@ -355,6 +362,12 @@ func _ready() -> void:
 
 	# ── Awareness controller ──────────────────────────────────────────────────
 	awareness = CreatureAwareness.new()
+	# R27: the jumpscare rig normally lives inline in this scene (editable).
+	# If a merged/edited .tscn ever loses that block, instance the canonical
+	# rig at runtime so the system can never silently disappear.
+	if get_node_or_null("JumpscareDirector") == null:
+		var rig: PackedScene = preload("res://scenes/enemies/jumpscare_rig.tscn")
+		add_child(rig.instantiate())
 	awareness.name = "Awareness"
 	add_child(awareness)
 	awareness.setup(self)
@@ -460,6 +473,20 @@ func _on_gun_fired(pos: Vector3) -> void:
 		set_alert(pos, true)
 		if awareness != null:
 			awareness.stamp_position(pos)
+
+
+## R26: stamp the kill source onto the survival system BEFORE the damage
+## emit, so the death router knows who landed the killing blow.
+func _tag_damage_source() -> void:
+	var player: Node = get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+	var sv: SurvivalSystem = player.find_child("Survival", true, false) as SurvivalSystem
+	if sv != null:
+		sv.last_damage_source = "creature"
+		# R29: stamp the tag so survival's death router can expire it — only a
+		# fresh tag routes the death through the jumpscare.
+		sv.last_damage_stamp_ms = Time.get_ticks_msec()
 
 
 func _wake(pos: Vector3) -> void:
@@ -607,6 +634,8 @@ func recover() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_player_died() -> void:
+	if jumpscare_hold:
+		return   # R26: the jumpscare IS the death beat; feeding is skipped.
 	if not _awake or _neutralized or _feed_phase != FeedPhase.NONE:
 		return
 	_feed_phase = FeedPhase.DROP
@@ -623,6 +652,7 @@ func _on_player_died() -> void:
 
 
 func _on_player_respawned() -> void:
+	jumpscare_hold = false   # R26: clear even when feeding never started.
 	if _feed_phase == FeedPhase.NONE:
 		return
 	_feed_phase = FeedPhase.NONE
@@ -933,6 +963,17 @@ func _physics_process(delta: float) -> void:
 	if _player == null:
 		_player = get_tree().get_first_node_in_group("player") as PlayerMovement
 	_drain_engine_log()
+
+	# R26: jumpscare hold — the director owns the body for the scare.
+	if jumpscare_hold:
+		_update_hull_transforms()
+		if _bt_player != null:
+			_bt_player.active = false
+		if nav != null:
+			nav.stop()
+		velocity = Vector3.ZERO
+		move_and_slide()
+		return
 
 	# Void reset.
 	if global_position.y < -5.0 or global_position.y < void_y:

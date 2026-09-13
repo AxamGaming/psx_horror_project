@@ -538,10 +538,23 @@ func _try_unstick() -> void:
 
 	var md: Vector3 = move_dir.normalized() if move_dir.length_squared() > 0.001 \
 			else Vector3(1.0, 0.0, 0.0)
-	if _unstick_fails == 1:
-		_backoff_dir = Vector3(-md.z, 0.0, md.x)   # strafe right
-	elif _unstick_fails == 2:
-		_backoff_dir = Vector3(md.z, 0.0, -md.x)   # strafe left
+	if _unstick_fails <= 2:
+		# R29: clearance-aware strafe. The old fixed right→left order could
+		# burn BOTH strafes into the closed side of a doorway pocket: the
+		# Door2 mouth leaves only ~±0.25 m of lateral slack for the ~1 m hull,
+		# and pressing a post's flat south face cancels all forward drive
+		# (contact slide has no deflection to offer). Probe both tangents at
+		# knee+shoulder height and commit to the side that is actually open;
+		# fail=2 flips to the other side, falling back to whichever tangent
+		# has clearance so lateral offset keeps accumulating instead of
+		# re-pinning on the same corner.
+		var right := Vector3(-md.z, 0.0, md.x)
+		var want := right if _unstick_fails == 1 else -_backoff_dir
+		if not _clear_path(want, 1.2):
+			var alt := -want
+			if _clear_path(alt, 1.2):
+				want = alt
+		_backoff_dir = want
 	else:
 		_backoff_dir = -md                           # back off
 	_backoff_t = BACKOFF_DURATION

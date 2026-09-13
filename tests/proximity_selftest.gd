@@ -46,8 +46,17 @@ func _process(_d: float) -> bool:
 				_cre.set("_awake", false)
 				_mon.preview_mode = false
 			if _frames > 90:
-				_check("B1 asleep -> faded out", _mon._fade < 0.02, "fade=%.3f" % _mon._fade)
-				_check("B1b trace hidden while asleep", not _mon.get_node("Trace").visible)
+				if _mon.require_awake:
+					_check("B1 asleep -> faded out", _mon._fade < 0.02, "fade=%.3f" % _mon._fade)
+					_check("B1b trace hidden while asleep", not _mon.get_node("Trace").visible)
+				else:
+					# Scene authored require_awake=false: the awake-gate is OFF,
+					# so sleeping must NOT hide the monitor — assert the
+					# opposite behaviour instead of the gated one.
+					_check("B1 asleep -> stays lit (authored require_awake=false)",
+						_mon._fade > 0.98, "fade=%.3f" % _mon._fade)
+					_check("B1b trace visible while asleep (gate off)",
+						_mon.get_node("Trace").visible)
 				_phase = 4
 				_frames = 0
 		4:  # awake + close -> shown + beats
@@ -158,7 +167,13 @@ func _part_a() -> void:
 		doms[3] > doms[2] and doms[2] > doms[1],
 		"red-dominance=%.2f,%.2f,%.2f,%.2f" % [doms[0], doms[1], doms[2], doms[3]])
 	_check("A5 label off by default (art direction)", _mon.show_label == false)
-	_check("A6 awake-gate on by default", _mon.require_awake == true)
+	# Assert the SCRIPT default (gate ships ON); the scene instance may carry
+	# an authored override (require_awake=false), which is a legitimate art/
+	# design choice — phases B1/B1b verify whichever value is authored.
+	var gate_probe: Node = (load("res://scenes/ui/proximity_monitor.gd") as GDScript).new()
+	_check("A6 awake-gate default ON in script", gate_probe.get("require_awake") == true,
+		"scene-authored require_awake=%s" % _mon.require_awake)
+	gate_probe.free()
 	var hp: AudioStreamPlayer = _mon.get_node_or_null("Heartbeat")
 	_check("A7 heartbeat player exists with stream",
 		hp != null and hp.stream != null)

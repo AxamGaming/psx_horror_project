@@ -1,9 +1,3 @@
-res://default_bus_layout.tres
-res://scenes/enemies/jumpscare_director.gd
-res://scenes/enemies/jumpscare_rig.tscn
-res://data/item_database.tres
+res://scenes/main.tscn
 res://scenes/enemies/jumpscare_anim.tres
-res://scenes/enemies/nightmare_creature.tscn
-res://scenes/levels/corridor_level.tscn
-res://scenes/props/prop_medbox.tscn
-res://scenes/props/prop_static.gd
+res://data/item_database.tres

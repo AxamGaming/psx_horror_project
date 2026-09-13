@@ -117,12 +117,16 @@ func _process(_d: float) -> bool:
 				_phase = 4
 				_frames = 0
 		4:  # J3: auto-respawn after the 2 s default anim
-			# Mid-sequence (~1.3 s after the kill): roar held, weld following.
+			# Mid-sequence (~1 s after the kill): charge spent, weld following.
 			if _frames == 60:
-				var cap2: AnimationPlayer = _cre.get("_anim") as AnimationPlayer
-				_check("J2h roar held after lunge beat",
-					cap2 != null and String(cap2.current_animation) == String(_cre.get("anim_roar")),
-					"current=%s" % (String(cap2.current_animation) if cap2 else "null"))
+				# R29b: the author intentionally removed the request_roar@0.6
+				# key from the scene library — the lunge pose holds the slam.
+				# request_roar() used to stop the charge too, so guard that the
+				# charge still expires on its own (_charge_left runs out ~0.32 s
+				# at the default distance/speed) and the creature can't drift.
+				_check("J2h lunge charge expired (no runaway drift)",
+					bool(_dir.get("_charging")) == false and float(_dir.get("_charge_left")) <= 0.0,
+					"charging=%s left=%.3f" % [bool(_dir.get("_charging")), float(_dir.get("_charge_left"))])
 				var camn2: Camera3D = _dir.get_node("CreatureKillCamera")
 				var dx: float = camn2.global_transform.origin.x - _cam_before_weld.x
 				_check("J12 kill cam welded to creature (follows teleport)",

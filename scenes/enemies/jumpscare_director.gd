@@ -106,6 +106,21 @@ var _play_name: StringName = &""
 
 
 func _ready() -> void:
+	# R28f: exactly ONE director per creature. If a level instance carries an
+	# edit-children override (or someone instanced jumpscare_rig alongside the
+	# inline block), the extra directors disable themselves instead of
+	# double-playing the scare. First director in child order wins.
+	var parent: Node = get_parent()
+	if parent != null:
+		var first: Node = null
+		for c in parent.get_children():
+			if c is JumpscareDirector:
+				first = c
+				break
+		if first != null and first != self:
+			push_warning("JumpscareDirector: duplicate under %s - disabling %s (keep ONE per creature)." % [parent.name, name])
+			set_process(false)
+			return
 	Events.player_killed_by_creature.connect(_on_creature_kill)
 	Events.player_respawned.connect(_on_respawned)
 	_kill_cam.current = false

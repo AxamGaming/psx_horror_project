@@ -332,6 +332,14 @@ func _process(delta: float) -> bool:
 		_invincible = false
 		if _rig != null and _rig.has_method("set_health"):
 			_rig.call("set_health", 1.0)
+		# R29: P7 is an ENVIRONMENTAL death (the feeding path). Combat swipes
+		# during the invincible P6 window can leave a fresh "creature" tag on
+		# survival, which — correctly, per the R26 routing — would divert this
+		# kill into the jumpscare path and skip feeding entirely. Clear the tag
+		# so the probe tests the path it claims to test.
+		var sv: Node = _player.find_child("Survival", true, false)
+		if sv != null:
+			sv.set("last_damage_source", "")
 		_events.emit_signal("player_damaged", 999.0, Vector3(1.0, 0.0, 0.0))
 	if _t > 106.5 and _t < 114.0:
 		if task == "Feeding":

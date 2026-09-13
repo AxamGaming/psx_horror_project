@@ -27,6 +27,14 @@ var _dead: bool = false
 ## the jumpscare; "" (environmental/unknown) keeps the classic death screen.
 ## Reset on respawn so a later fall doesn't inherit an old tag.
 var last_damage_source: String = ""
+## R29: when the tag was stamped (Time ticks, msec). A tag only routes the
+## death while it is FRESH — a swipe you survived minutes ago must not turn a
+## later fall death into a creature jumpscare (the kill cam would weld to a
+## creature that may be across the map). The lethal blow lands within frames
+## of its tag, so the window only needs to cover that + death-check latency.
+var last_damage_stamp_ms: int = 0
+## How long a damage-source tag stays authoritative for death routing.
+@export var kill_source_window: float = 2.0
 var _spawn: Vector3
 
 
@@ -66,7 +74,12 @@ func _process(delta: float) -> void:
 	if _rig.health01 <= 0.0:
 		_dead = true
 		_player.dead = true
-		if last_damage_source == "creature":
+		# R29: only a FRESH creature tag routes through the jumpscare — see
+		# last_damage_stamp_ms. Stale tags (survived swipe + later fall death)
+		# keep the classic environmental route.
+		var tag_fresh: bool = float(Time.get_ticks_msec() - last_damage_stamp_ms) \
+				<= kill_source_window * 1000.0
+		if last_damage_source == "creature" and tag_fresh:
 			Events.player_killed_by_creature.emit()
 		Events.player_died.emit()
 
@@ -76,6 +89,7 @@ func _on_respawn_requested() -> void:
 		return
 	_dead = false
 	last_damage_source = ""
+	last_damage_stamp_ms = 0
 	_player.dead = false
 	_rig.set_health(1.0)
 	_rig.set_stamina(1.0)

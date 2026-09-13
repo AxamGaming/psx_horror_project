@@ -59,9 +59,12 @@ creature swipe/lunge
    `anim_name` (AnimationPlayer stores anims in libraries — the doc's
    `add_animation` call does not exist). Designer-authored animation of the same
    name in the .tscn always wins. Default: fov 90→`cam_fov` slam at 0.22 s,
-   handheld shake keys 0.2–0.5 s, light 0→peak→decay→0, `request_roar()`
-   method-track at 0.02 s (safe because `jumpscare_hold` freezes the selector
-   that would overwrite it). Length 2.0 s.
+   handheld shake keys 0.2–0.5 s, light 0→peak→decay→0, `request_lunge()`
+   method-track at 0.02 s and `request_roar()` at 0.60 s (safe because
+   `jumpscare_hold` freezes the selector that would overwrite them).
+   Length 2.0 s. NOTE: this fallback only runs when no scene-wired library is
+   present — the shipped `jumpscare_anim.tres` (author-edited) deliberately
+   carries ONLY `request_lunge@0.02`; see §"Lunge-at-lens beat" below.
 5. **Track paths** in the default anim use `../CreatureKillCamera` etc. —
    AnimationPlayer paths are relative to the player node; cam/light are siblings.
    The method track targets `..` (the director).
@@ -82,8 +85,9 @@ Inspector (on `JumpscareDirector`): `cam_offset`, `cam_fov`, `head_bone_name`,
 `stinger_volume_db`.
 
 Animation editor (on `JumpscareAnim`): everything timing-shaped — fov curve,
-shake keys, light curve, bone poses, method calls (`request_roar`,
-`_end_sequence` for custom respawn timing when `auto_respawn_on_finish = false`).
+shake keys, light curve, bone poses, method calls (`request_lunge`,
+`request_roar`, `_end_sequence` for custom respawn timing when
+`auto_respawn_on_finish = false`).
 
 ## 5. Test coverage vs design §10
 
@@ -241,6 +245,14 @@ creature visible but never a face shot). Root causes addressed:
    `request_roar()` at t=0.60 (charge stops, roar pose held to the end). The
    face rushes the camera, then slams and holds. Both are method tracks on the
    director, so retime them freely in the animation editor.
+   **R29b author verdict:** in the shipped scene library
+   (`scenes/enemies/jumpscare_anim.tres`) the `request_roar@0.60` key was
+   deleted ON PURPOSE — the lunge pose holds the slam, no roar beat. The
+   charge still can't run away: it expires by itself when `_charge_left`
+   hits 0 (~0.32 s at defaults), which is what selftest J2h now guards. The
+   code-built fallback (library-less scenes only) still inserts both keys;
+   `request_roar()` remains available if you ever want the beat back — just
+   re-add the method key in the panel.
 3. **Your tscn edits are safe now.** `nightmare_creature.tscn` is NO LONGER
    shipped in fix zips. The canonical rig also exists as
    `scenes/enemies/jumpscare_rig.tscn`, and `nightmare_creature.gd` instances it
@@ -254,6 +266,7 @@ rig); the editor pose becomes the head-relative offset at runtime. Tune the
 beat via `charge_distance`, `charge_speed`, `lunge_anim_prop`, or by retiming
 the two method keys in `JumpscareAnim`.
 
-Checks: 26/26 (J2g lunge at cut, J2h roar held, J12 weld-follow, J7 now asserts
+Checks: 26/26 (J2g lunge at cut, J2h lunge-charge expired — repurposed after
+the author removed the roar key, J12 weld-follow, J7 now asserts
 cam-rides-creature instead of a static position). ai_selftest 0 failures,
 smoke pass.

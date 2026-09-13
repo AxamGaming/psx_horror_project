@@ -41,6 +41,7 @@ var _memory_t: float = 0.0    # time since last update; expires at MEMORY_TIMEOU
 # ── Aggregate flags (polled by BT tasks) ─────────────────────────────────────
 var _confirmed_visible: bool = false
 var _heard: bool = false
+var _heard_quietly: bool = false   # true only when heard via the QUIET tier
 var _proximity: bool = false
 
 
@@ -117,6 +118,13 @@ func confirmed() -> bool:
 func heard() -> bool:
 	return _heard
 
+## True when the CURRENT hearing is via the quiet tier only (idle/crouch
+## rustle inside crouch_hear_range). False for loud-tier hearing (walk/sprint)
+## and whenever nothing is heard. Lets BT/UI distinguish "faint rustle — go
+## look" from "footsteps — hunt". See docs/NOISE_METER.md §3.
+func heard_quietly() -> bool:
+	return _heard_quietly
+
 ## True when the player is within point-blank proximity_range.
 func proximity() -> bool:
 	return _proximity
@@ -148,6 +156,7 @@ func _reset_sensors() -> void:
 	_confirmed = false
 	_confirmed_visible = false
 	_heard = false
+	_heard_quietly = false
 	_proximity = false
 
 
@@ -212,8 +221,27 @@ func _multi_los() -> bool:
 	return false
 
 
+## Two-tier hearing (docs/NOISE_METER.md §3):
+##
+##   LOUD tier  (noise > hear_noise_floor): audible radius scales with
+##              loudness — hear_radius * noise. Walk heard at half range,
+##              sprint at full range.
+##   QUIET tier (idle / crouch-walk): point-blank only — inside
+##              crouch_hear_range metres. Set crouch_hear_range = 0.0 to
+##              disable the quiet tier entirely.
+##
+## Setting hear_noise_floor = 0.05 restores the legacy single-tier behaviour
+## (crouch-walk faintly audible inside hear_radius * 0.15 ≈ 2.4 m).
 func _hearing_check() -> bool:
 	if _creature == null or _player == null:
+		_heard_quietly = false
 		return false
 	var noise: float = _player.noise_level
-	return noise > 0.05 and _creature.dist_to_player() < _creature.hear_radius * noise
+	var dist: float = _creature.dist_to_player()
+	if noise > _creature.hear_noise_floor:
+		# LOUD tier — never reported as a quiet rustle.
+		_heard_quietly = false
+		return dist < _creature.hear_radius * noise
+	# QUIET tier — faint rustle, point-blank only.
+	_heard_quietly = dist < _creature.crouch_hear_range
+	return _heard_quietly

@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://dxg5wh225ejrt" path="res://scenes/level/crawlspace_zone.gd" id="3_crawl"]
 [ext_resource type="PackedScene" path="res://scenes/level/pickup_item.tscn" id="4_pickup"]
 [ext_resource type="PackedScene" path="res://scenes/props/prop_barrel.tscn" id="5_pbarrel"]
-[ext_resource type="PackedScene" path="res://scenes/props/prop_medbox.tscn" id="10_pmed"]
+[ext_resource type="PackedScene" uid="uid://dnxnd1fxt5yn3" path="res://scenes/props/prop_medbox.tscn" id="10_pmed"]
 [ext_resource type="PackedScene" uid="uid://db6lletgxie5d" path="res://assets/models/medical_box/medical_box_2k.gltf" id="11_medmesh"]
 [ext_resource type="PackedScene" uid="uid://cnghfrusfew8c" path="res://scenes/enemies/nightmare_creature.tscn" id="12_creature"]
 [ext_resource type="Script" uid="uid://dpgt0afbh44aa" path="res://scenes/level/nav_baker.gd" id="90_nav"]

@@ -142,7 +142,20 @@ func _probe() -> void:
 		print("NAVPROBE FAIL: Hall and Corridor are disconnected in the mesh")
 
 
+## R23: rebaking when a door swings is PURE COST. Doors are invisible to the
+## bake twice over — they are not in NAV_GROUP (SOURCE_GEOMETRY_GROUPS_EXPLICIT)
+## and geometry_collision_mask = 1 excludes their layer 16 — so a rebake after a
+## door change produces a byte-identical mesh while freezing the main thread
+## (creature_log: NAVBAKE #3 lands exactly when the creature force-opens a door
+## mid-chase; measured: the in-game rebake stalls for seconds, and under
+## contention far longer). Kept as an export in case a future level ever puts
+## doors INTO the bake groups/mask — then flip this on.
+@export var rebake_on_door_change: bool = false
+
+
 func _on_door_changed(_open: bool) -> void:
+	if not rebake_on_door_change:
+		return
 	_dirty = true
 	_rebake_t = 0.5                # debounce: let the 1.6 s swing finish first
 
@@ -155,4 +168,7 @@ func _process(delta: float) -> void:
 		return
 	_dirty = false
 	if _region != null and not _region.is_baking():
-		_region.bake_navigation_mesh(true)
+		# R23: create_uv_map=false. The second UV array is editor/debug-only;
+		# runtime pathfinding never reads it, and building it is a large share
+		# of bake cost. Both call sites pass false now.
+		_region.bake_navigation_mesh(false)

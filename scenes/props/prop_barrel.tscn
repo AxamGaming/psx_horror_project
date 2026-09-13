@@ -1,10 +1,22 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/props/prop_static.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://assets/models/barrel_03/barrel_03_2k.gltf" id="2_mesh"]
+
+[sub_resource type="CylinderShape3D" id="CylCol_barrel"]
+radius = 0.33
+height = 0.94
 
 [node name="Prop" type="StaticBody3D"]
 script = ExtResource("1_script")
 surface_tag = "metal"
 
 [node name="Mesh" parent="." instance=ExtResource("2_mesh")]
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+# Mesh AABB centre in body space is (0, 0.465, 0) — the barrel mesh sits ON the
+# body origin, not centred on it. Forgetting this offset sinks the collider
+# half into the floor and leaves an invisible stump in the chase corridor
+# (R24: broke ai_selftest P5/L2 until fixed).
+position = Vector3(0, 0.465, 0)
+shape = SubResource("CylCol_barrel")

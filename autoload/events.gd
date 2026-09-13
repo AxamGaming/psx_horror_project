@@ -29,6 +29,10 @@ signal item_dropped(item_id: String)
 signal wall_hit(position: Vector3, strength: float)
 ## Death / respawn loop (SurvivalSystem owns the state).
 signal player_died()
+## R26: emitted ADDITIONALLY and FIRST when the killing blow is confirmed as
+## the creature's (swipe or lunge). JumpscareDirector listens; the death overlay
+## is suppressed for these deaths. Environmental deaths never emit this.
+signal player_killed_by_creature()
 signal player_respawned()
 signal respawn_requested()
 ## Weapon fired — position of the shot. Wakes/investigates the creature.

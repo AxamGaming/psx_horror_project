@@ -16,6 +16,8 @@ class_name PropStatic
 @export var surface_tag: String = ""
 @export var auto_collide: bool = true
 
+@export_range(0, 4096, 16) var trimesh_warn_tris: int = 200
+
 
 func _ready() -> void:
 	if surface_tag != "":
@@ -23,7 +25,13 @@ func _ready() -> void:
 	if auto_collide and not _has_collision():
 		var mi: MeshInstance3D = _find_mesh(self)
 		if mi != null and mi.mesh != null:
-			mi.create_trimesh_collision()
+			mi.create_convex_collision()
+			var tris: int = _count_tris(mi.mesh)
+			if tris > trimesh_warn_tris:
+				push_warning("PropStatic %s: generated a %d-triangle trimesh collider. \
+Add a primitive CollisionShape3D child (cylinder/box) to the prop scene instead — \
+trimesh contact solving against the creature's 9-shape hull costs milliseconds \
+per frame (see docs/FIXES_R24_prop_trimesh_lag.md)." % [name, tris])
 
 
 func _find_mesh(n: Node) -> MeshInstance3D:
@@ -35,6 +43,13 @@ func _find_mesh(n: Node) -> MeshInstance3D:
 		if r != null:
 			return r
 	return null
+
+
+func _count_tris(mesh: Mesh) -> int:
+	var n := 0
+	for si in range(mesh.get_surface_count()):
+		n += int(mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX].size()) / 3
+	return n
 
 
 func _has_collision() -> bool:

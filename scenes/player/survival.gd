@@ -23,6 +23,10 @@ var _player: PlayerMovement
 var _rig: CameraRig
 var _recover_timer: float = 0.0
 var _dead: bool = false
+## R26: who landed the last damaging blow. "creature" routes the death through
+## the jumpscare; "" (environmental/unknown) keeps the classic death screen.
+## Reset on respawn so a later fall doesn't inherit an old tag.
+var last_damage_source: String = ""
 var _spawn: Vector3
 
 
@@ -62,6 +66,8 @@ func _process(delta: float) -> void:
 	if _rig.health01 <= 0.0:
 		_dead = true
 		_player.dead = true
+		if last_damage_source == "creature":
+			Events.player_killed_by_creature.emit()
 		Events.player_died.emit()
 
 
@@ -69,6 +75,7 @@ func _on_respawn_requested() -> void:
 	if not _dead:
 		return
 	_dead = false
+	last_damage_source = ""
 	_player.dead = false
 	_rig.set_health(1.0)
 	_rig.set_stamina(1.0)

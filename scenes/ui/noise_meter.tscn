@@ -1,0 +1,53 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/noise_meter.gd" id="1_meter"]
+[ext_resource type="Script" path="res://scenes/ui/noise_meter_bar.gd" id="2_bar"]
+[ext_resource type="Shader" path="res://shaders/ui_weather.gdshader" id="3_bleed"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bleed"]
+shader = ExtResource("3_bleed")
+shader_parameter/influence = 1.0
+shader_parameter/grain_amount = 0.1
+shader_parameter/grain_speed = 17.0
+shader_parameter/grain_block_px = 2.0
+shader_parameter/scanline_amount = 0.1
+shader_parameter/scanline_period_px = 3.0
+shader_parameter/vignette_amount = 0.35
+shader_parameter/vignette_softness = 1.6
+shader_parameter/grade_tint = Vector3(0.86, 0.93, 0.9)
+shader_parameter/grade_amount = 0.1
+shader_parameter/rect_size = Vector2(220, 14)
+shader_parameter/corner_radius = 8.0
+shader_parameter/edge_feather = 4.0
+
+[node name="NoiseMeter" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_meter")
+
+[node name="Bar" type="Control" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -110.0
+offset_top = -106.0
+offset_right = 110.0
+offset_bottom = -92.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("2_bar")
+
+[node name="BleedOverlay" type="ColorRect" parent="Bar"]
+material = SubResource("ShaderMaterial_bleed")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

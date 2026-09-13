@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://cm20sfu736crd"]
+
+[ext_resource type="Script" uid="uid://blvq2v8gjafja" path="res://scenes/ui/proximity_monitor.gd" id="1_prox"]
+[ext_resource type="Script" uid="uid://blgn7rpixwnv2" path="res://scenes/ui/proximity_trace.gd" id="2_trace"]
+[ext_resource type="Shader" uid="uid://ec2ni2eg1jcv" path="res://shaders/ui_weather.gdshader" id="3_bleed"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_proxbleed"]
+shader = ExtResource("3_bleed")
+shader_parameter/influence = 1.0
+shader_parameter/grain_amount = 0.1
+shader_parameter/grain_speed = 17.0
+shader_parameter/grain_block_px = 2.0
+shader_parameter/scanline_amount = 0.1
+shader_parameter/scanline_period_px = 3.0
+shader_parameter/vignette_amount = 0.35
+shader_parameter/vignette_softness = 1.6
+shader_parameter/grade_tint = Vector3(0.86, 0.93, 0.9)
+shader_parameter/grade_amount = 0.1
+shader_parameter/rect_size = Vector2(220, 44)
+shader_parameter/corner_radius = 8.0
+shader_parameter/edge_feather = 4.0
+
+[node name="ProximityMonitor" type="Control" unique_id=1067685926]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_prox")
+require_awake = false
+
+[node name="Trace" type="Control" parent="." unique_id=1930137568]
+anchors_preset = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -236.0
+offset_top = -110.0
+offset_right = -16.0
+offset_bottom = -66.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("2_trace")
+
+[node name="BleedOverlay" type="ColorRect" parent="Trace" unique_id=2048258922]
+material = SubResource("ShaderMaterial_proxbleed")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

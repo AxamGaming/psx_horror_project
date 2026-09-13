@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/levels/corridor_level.tscn" id="2_level"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/item_toast.tscn" id="7_toast_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/survival_hud.tscn" id="8_hud_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crosshair.tscn" id="9_cross_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/noise_meter.tscn" id="10_meter_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/proximity_monitor.tscn" id="11_prox_scn"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vhs"]
 shader = ExtResource("3_vhs")
@@ -51,6 +53,10 @@ mouse_filter = 2
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 10
+
+[node name="NoiseMeter" parent="UI" instance=ExtResource("10_meter_scn")]
+
+[node name="ProximityMonitor" parent="UI" instance=ExtResource("11_prox_scn")]
 
 [node name="DebugPanel" parent="UI" instance=ExtResource("4_panel_scn")]
 

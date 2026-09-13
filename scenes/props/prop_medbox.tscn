@@ -1,10 +1,17 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dnxnd1fxt5yn3"]
 
-[ext_resource type="Script" path="res://scenes/props/prop_static.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://assets/models/medical_box/medical_box_2k.gltf" id="2_mesh"]
+[ext_resource type="Script" uid="uid://ptovo4vrhg4x" path="res://scenes/props/prop_static.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://db6lletgxie5d" path="res://assets/models/medical_box/medical_box_2k.gltf" id="2_mesh"]
 
-[node name="Prop" type="StaticBody3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_7fy3h"]
+size = Vector3(0.53356934, 0.1031189, 0.3555298)
+
+[node name="Prop" type="StaticBody3D" unique_id=32732389]
 script = ExtResource("1_script")
 surface_tag = "metal"
 
-[node name="Mesh" parent="." instance=ExtResource("2_mesh")]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1043818457]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00018310547, 0.048416138, 0.0020446777)
+shape = SubResource("BoxShape3D_7fy3h")
+
+[node name="Mesh" parent="." unique_id=977886720 instance=ExtResource("2_mesh")]

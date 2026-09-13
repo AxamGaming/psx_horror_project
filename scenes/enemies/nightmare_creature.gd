@@ -61,6 +61,23 @@ const LOG_PATH  := "user://creature_log.txt"
 @export var patrol_points: Array[Vector3] = []
 @export var auto_patrol_radius: float = 4.0
 @export var hear_radius: float = 16.0
+## Minimum player noise_level the creature can hear AT ALL. Above this, audible
+## range scales with loudness (hear_radius * noise), so walking is heard at half
+## the sprint radius.
+##
+## 0.30 (default) sits between crouch-walk (0.15) and walk (0.50) in
+## movement.gd, which gives the intended stealth contract:
+##   idle / still / crouch-walk  -> never heard at distance
+##   walk                        -> heard inside hear_radius * 0.50
+##   sprint                      -> heard inside hear_radius * 1.00
+## Set this back to 0.05 to restore the pre-hearing-floor behaviour, where a
+## crouching player was faintly audible inside ~2.4 m.
+@export_range(0.0, 1.0) var hear_noise_floor: float = 0.3
+## Quiet states (noise below hear_noise_floor) are still audible at point-blank
+## range — breathing distance, not a hearing check. This is what keeps crouching
+## from being a free invisibility button when you are standing next to it.
+## 0.0 disables close-range hearing of quiet states entirely.
+@export var crouch_hear_range: float = 1.6
 @export var sight_range: float = 12.0
 ## R16: 75° felt arbitrary once the model actually faces where it looks; 90°
 ## matches the visible head sweep far better (sneaking up behind still works).
@@ -798,6 +815,7 @@ func do_swipe() -> void:
 	if _player != null and dist_to_player() < swipe_range * 1.25 \
 			and absf(player_pos().y - global_position.y) < 1.6:
 		var dir: Vector3 = (player_pos() - global_position).normalized()
+		_tag_damage_source()
 		Events.player_damaged.emit(swipe_damage, dir)
 		_player.apply_knockback(dir, knockback_force * 0.6)
 		_growl.play()
@@ -985,6 +1003,7 @@ func _physics_process(delta: float) -> void:
 				_lunge_hit = true
 				_lunge_hit_t = _lunge_t
 				var dir: Vector3 = (player_pos() - global_position).normalized()
+				_tag_damage_source()
 				Events.player_damaged.emit(lunge_damage, dir)
 				_player.apply_knockback(dir, knockback_force)
 				_growl.play()

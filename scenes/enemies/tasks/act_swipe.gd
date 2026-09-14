@@ -23,7 +23,7 @@ func _tick(_delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
 		return FAILURE
-	cre.set_task_tag("ActSwipe")
+	cre.set_task_tag(NightmareCreature.TaskTag.SWIPE)
 	if not _started:
 		cre.start_windup()
 		_started = true

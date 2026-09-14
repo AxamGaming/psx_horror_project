@@ -236,8 +236,9 @@ Verified with an in-game repro (full `main.tscn` under Xvfb, creature awake at
 ### Audio troubleshooting kit (added after a "no heartbeat" field report)
 
 Local repro proved the voice fires correctly in-game (beats increment, stream
-0.75 s, bus SFX unmuted, vol ≈ -2.5 dB at contact). Silence on a specific
-machine is therefore environmental, so the widget now self-diagnoses:
+1.91 s since the R32 asset-canonical policy — this doc originally quoted an
+earlier 0.75 s trim — bus SFX unmuted, vol ≈ -2.5 dB at contact). Silence on a
+specific machine is therefore environmental, so the widget now self-diagnoses:
 
 - `_ready()` pushes warnings if the stream is missing/unimported, if `heart_bus`
   does not exist (falls back to Master), or if that bus is muted.

@@ -10,7 +10,7 @@ func _tick(_delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
 		return FAILURE
-	cre.set_task_tag("ActPatrol")
+	cre.set_task_tag(NightmareCreature.TaskTag.PATROL)
 	if cre.is_stuck():
 		cre.next_patrol_point()   # point inside geometry: skip it, keep walking
 		cre.clear_stuck()         # else the hot flag chain-skips every point

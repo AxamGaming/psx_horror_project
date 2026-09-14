@@ -253,7 +253,7 @@ func _send_key(keycode: int, pressed: bool) -> void:
 ##   walk    -> forward held                       => noise 0.50
 ##   sprint  -> forward + sprint held              => noise 1.00
 ##
-## Crouch-walk needs BOTH: movement.gd gates on `not input_active or
+## Crouch-walk needs BOTH: player_movement.gd gates on `not input_active or
 ## planar_speed < 0.2` FIRST, so a crouched but stationary player is classified
 ## idle (0.06), not crouch-walk (0.15). Asserting the crouch tier therefore
 ## requires genuine crouch-MOVEMENT, and enough frames for velocity to ramp past
@@ -277,7 +277,7 @@ func _release_gait() -> void:
 
 
 ## Arm a probe: place the player `dist` metres from the creature and drive its
-## gait so movement.gd derives the intended noise_level on its own.
+## gait so player_movement.gd derives the intended noise_level on its own.
 ##
 ## Why drive gait rather than poke noise_level: _update_gait_state() runs at the
 ## END of the player's _physics_process and recomputes noise_level from

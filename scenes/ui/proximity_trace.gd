@@ -96,10 +96,10 @@ func _draw() -> void:
 		noise = monitor.call("jitter_seed_noise")
 
 	# ── Bezel + screen ───────────────────────────────────────────────────────
-	draw_colored_polygon(_rounded_points(r, 6.0), Color(0.055, 0.058, 0.062, 0.88))
-	draw_polyline(_closed(_rounded_points(r, 6.0)), Color(0.24, 0.26, 0.28, 0.8), 1.0)
+	draw_colored_polygon(UiDrawUtil.rounded_points(r, 6.0), Color(0.055, 0.058, 0.062, 0.88))
+	draw_polyline(UiDrawUtil.closed(UiDrawUtil.rounded_points(r, 6.0)), Color(0.24, 0.26, 0.28, 0.8), 1.0)
 	var screen := r.grow(-3.0)
-	draw_colored_polygon(_rounded_points(screen, 4.0), Color(0.045, 0.065, 0.055, 0.92))
+	draw_colored_polygon(UiDrawUtil.rounded_points(screen, 4.0), Color(0.045, 0.065, 0.055, 0.92))
 
 	# ── Centre phosphor glow ─────────────────────────────────────────────────
 	if _glow_tex != null and glow > 0.001:
@@ -175,35 +175,3 @@ func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
 		draw_string(font, Vector2(r.position.x + 2.0, r.position.y - 4.0),
 			names[band], HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, label_col)
-
-
-# ── rounded-rect helpers (same geometry as NoiseMeterBar) ────────────────────
-
-func _rounded_points(r: Rect2, rad: float, seg: int = 6) -> PackedVector2Array:
-	var pts := PackedVector2Array()
-	rad = clampf(rad, 0.0, minf(r.size.x, r.size.y) * 0.5)
-	if rad <= 0.01:
-		pts.push_back(r.position)
-		pts.push_back(Vector2(r.end.x, r.position.y))
-		pts.push_back(r.end)
-		pts.push_back(Vector2(r.position.x, r.end.y))
-		return pts
-	var centers := [
-		Vector2(r.end.x - rad, r.position.y + rad),
-		Vector2(r.end.x - rad, r.end.y - rad),
-		Vector2(r.position.x + rad, r.end.y - rad),
-		Vector2(r.position.x + rad, r.position.y + rad),
-	]
-	var starts := [-PI * 0.5, 0.0, PI * 0.5, PI]
-	for c in range(4):
-		for k in range(seg + 1):
-			var a: float = starts[c] + (PI * 0.5) * float(k) / float(seg)
-			pts.push_back(centers[c] + Vector2(cos(a), sin(a)) * rad)
-	return pts
-
-
-func _closed(pts: PackedVector2Array) -> PackedVector2Array:
-	var out := PackedVector2Array(pts)
-	if out.size() > 0:
-		out.push_back(out[0])
-	return out

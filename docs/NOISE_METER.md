@@ -20,7 +20,7 @@ Design history: `noise_meter_design.md` (workspace root). This file documents
 | `tests/noise_meter_selftest.gd` | 47-check self-test (hearing tiers + widget behaviour). |
 | `tests/meter_capture.gd` | Dev tool: renders the meter strip at 6 loudness levels to `user://meter_cap/` for art review. |
 
-Nothing else in the project was touched. `movement.gd`'s noise bands, the
+Nothing else in the project was touched. `player_movement.gd`'s noise bands, the
 `gun_fired` / `hard_landed` / `wall_hit` signals, the VHS pass and the camera
 shake systems are all exactly as they were.
 
@@ -186,7 +186,7 @@ centre pixel of the rendered frame is the graded red-orange mix, not raw red.
 3. **Why the test loads the scene with `load()`, not `preload()`.** `preload()`
    compiles `noise_meter.gd` while the test script is parsed — before autoloads
    exist — so the `Events` identifier inside it fails to resolve.
-4. **Why the test injects real key events.** `movement.gd` recomputes
+4. **Why the test injects real key events.** `player_movement.gd` recomputes
    `noise_level` from `input_active`/`planar_speed`/`is_crouched`/`is_sprinting` at
    the end of *every* physics frame, so any value poked from outside is clobbered
    before the creature reads it. The test presses real W/Shift keys via

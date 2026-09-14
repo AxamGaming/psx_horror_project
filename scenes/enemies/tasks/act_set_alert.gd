@@ -8,7 +8,7 @@ func _tick(_delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
 		return FAILURE
-	cre.set_task_tag("ActSetAlert")
+	cre.set_task_tag(NightmareCreature.TaskTag.SET_ALERT)
 
 	var target: Vector3 = cre.player_pos()
 	if cre.awareness != null and cre.awareness.has_memory():

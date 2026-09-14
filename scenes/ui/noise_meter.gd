@@ -33,7 +33,7 @@ class_name NoiseMeter
 ## (editor preview, tests, cutscenes).
 @export_range(0.0, 1.0) var noise_level: float = 0.0
 ## When no player is bound, the meter demos itself from these bands instead of
-## sitting dead at zero. Matches movement.gd's real values by default.
+## sitting dead at zero. Matches player_movement.gd's real values by default.
 @export_range(0.0, 1.0) var idle_noise: float = 0.06
 @export_range(0.0, 1.0) var crouch_noise: float = 0.15
 @export_range(0.0, 1.0) var walk_noise: float = 0.5
@@ -156,7 +156,7 @@ func _ready() -> void:
 	Events.inventory_toggled.connect(_set_menu_open)
 
 	# Noise spikes. These signals already exist and are already emitted by
-	# movement.gd / weapon_system.gd — the meter is just another subscriber.
+	# player_movement.gd / weapon_system.gd — the meter is just another subscriber.
 	Events.hard_landed.connect(_on_hard_landed)
 	Events.gun_fired.connect(_on_gun_fired)
 	Events.wall_hit.connect(_on_wall_hit)

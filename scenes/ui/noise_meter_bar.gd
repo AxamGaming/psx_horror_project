@@ -45,9 +45,9 @@ func _draw() -> void:
 	if owner_meter == null:
 		# Standalone mockup path: no meter to read. Literals are intentional
 		# here — this branch has no inspector surface to read from.
-		var fb := _rounded_points(r, 4.0)
+		var fb := UiDrawUtil.rounded_points(r, 4.0)
 		draw_colored_polygon(fb, Color(0.09, 0.10, 0.11, 0.78))
-		draw_polyline(_closed(fb), Color(0.26, 0.28, 0.30, 0.85), 1.0)
+		draw_polyline(UiDrawUtil.closed(fb), Color(0.26, 0.28, 0.30, 0.85), 1.0)
 		return
 
 	var v: float = clampf(float(owner_meter.call("displayed_noise")), 0.0, 1.0)
@@ -64,10 +64,10 @@ func _draw() -> void:
 	# ── Track + frame (rounded) ────────────────────────────────────────────────
 	# draw_rect() cannot round corners, and the spec asks for a rounded track
 	# with a faint border, so both are drawn from an explicit rounded polygon.
-	var track_pts := _rounded_points(r, float(owner_meter.get("corner_radius")))
+	var track_pts := UiDrawUtil.rounded_points(r, float(owner_meter.get("corner_radius")))
 	draw_colored_polygon(track_pts, track)
 	if border_w > 0.0:
-		draw_polyline(_closed(track_pts), border, border_w)
+		draw_polyline(UiDrawUtil.closed(track_pts), border, border_w)
 
 	var inner := r.grow(-pad)
 	if inner.size.x <= 0.0 or inner.size.y <= 0.0:
@@ -97,41 +97,6 @@ func _draw() -> void:
 		if bleed > 0.05:
 			var fr_r := Rect2(fr.position + Vector2(-bleed, 0.0), fr.size)
 			var fr_b := Rect2(fr.position + Vector2(bleed, 0.0), fr.size)
-			draw_colored_polygon(_rounded_points(fr_r, frad), Color(col.r, 0.0, 0.0, 0.30))
-			draw_colored_polygon(_rounded_points(fr_b, frad), Color(0.0, 0.0, col.b, 0.30))
-		draw_colored_polygon(_rounded_points(fr, frad), col)
-
-
-# ── rounded-rect geometry ────────────────────────────────────────────────────
-
-## Outline points of a rounded rectangle, clockwise from the top-right corner.
-## `seg` arc segments per corner; 6 is plenty at HUD scale and cheap to draw.
-func _rounded_points(r: Rect2, rad: float, seg: int = 6) -> PackedVector2Array:
-	var pts := PackedVector2Array()
-	rad = clampf(rad, 0.0, minf(r.size.x, r.size.y) * 0.5)
-	if rad <= 0.01:
-		pts.push_back(r.position)
-		pts.push_back(Vector2(r.end.x, r.position.y))
-		pts.push_back(r.end)
-		pts.push_back(Vector2(r.position.x, r.end.y))
-		return pts
-	var centers := [
-		Vector2(r.end.x - rad, r.position.y + rad),     # top-right
-		Vector2(r.end.x - rad, r.end.y - rad),          # bottom-right
-		Vector2(r.position.x + rad, r.end.y - rad),     # bottom-left
-		Vector2(r.position.x + rad, r.position.y + rad) # top-left
-	]
-	var starts := [-PI * 0.5, 0.0, PI * 0.5, PI]
-	for c in range(4):
-		for i in range(seg + 1):
-			var a: float = starts[c] + (PI * 0.5) * float(i) / float(seg)
-			pts.push_back(centers[c] + Vector2(cos(a), sin(a)) * rad)
-	return pts
-
-
-## Closes a polygon outline so draw_polyline() draws the final edge too.
-func _closed(pts: PackedVector2Array) -> PackedVector2Array:
-	var out := PackedVector2Array(pts)
-	if out.size() > 0:
-		out.push_back(out[0])
-	return out
+			draw_colored_polygon(UiDrawUtil.rounded_points(fr_r, frad), Color(col.r, 0.0, 0.0, 0.30))
+			draw_colored_polygon(UiDrawUtil.rounded_points(fr_b, frad), Color(0.0, 0.0, col.b, 0.30))
+		draw_colored_polygon(UiDrawUtil.rounded_points(fr, frad), col)

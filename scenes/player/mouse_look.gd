@@ -5,7 +5,7 @@ extends Node3D
 ##
 ## SINGLE-WRITER RULE (Rule 1):
 ##   - This script owns HeadPivot.rotation.x (PITCH) — nothing else touches it.
-##   - This script owns the Player body's rotation.y (YAW) — movement.gd only
+##   - This script owns the Player body's rotation.y (YAW) — player_movement.gd only
 ##     ever writes position/velocity, never rotation.
 ##   - Roll is intentionally NEVER written here; CameraRig (Phase 3) owns roll
 ##     and applies it on the Camera3D itself, so aiming stays pixel-precise.

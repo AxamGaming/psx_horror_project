@@ -6,6 +6,11 @@
 
 # Jumpscare System — As-Built (R26)
 
+> **Archived in R32.** This documents the deleted R26-R29 jumpscare rig
+> (`jumpscare_director.gd` / `jumpscare_anim.tres` / `jumpscare_rig.tscn`).
+> Kept for historical routing logic only - the live system is
+> `docs/KILL_SEQUENCE_R30.md`.
+
 Implements `uploads/2026-09-12-creature-jumpscare-design.md` with the four field
 decisions taken before implementation (hold-roar, functional default animation,
 new CC0 stinger, VHS kept over the kill cam). Status: **built and tested**

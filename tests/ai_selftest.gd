@@ -339,7 +339,13 @@ func _process(delta: float) -> bool:
 		# so the probe tests the path it claims to test.
 		var sv: Node = _player.find_child("Survival", true, false)
 		if sv != null:
-			sv.set("last_damage_source", "")
+			# R32: the tag is an enum now (SurvivalSystem.DamageSource.NONE =
+			# 0). Referenced BY VALUE on purpose: naming the class here would
+			# add survival.gd to this script's compile-time deps, and under
+			# `-s` dependencies compile before autoloads are registered, so
+			# survival.gd's bare `Events` identifier fails to resolve and
+			# takes the whole suite down with it.
+			sv.set("last_damage_source", 0)
 		_events.emit_signal("player_damaged", 999.0, Vector3(1.0, 0.0, 0.0))
 	if _t > 106.5 and _t < 114.0:
 		if task == "Feeding":

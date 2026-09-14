@@ -23,10 +23,13 @@ var _player: PlayerMovement
 var _rig: CameraRig
 var _recover_timer: float = 0.0
 var _dead: bool = false
-## R26: who landed the last damaging blow. "creature" routes the death through
-## the jumpscare; "" (environmental/unknown) keeps the classic death screen.
-## Reset on respawn so a later fall doesn't inherit an old tag.
-var last_damage_source: String = ""
+## R26: who landed the last damaging blow. CREATURE routes the death through
+## the kill sequence; NONE (environmental/unknown) keeps the classic death
+## screen. R32: was a String ("creature" / "") — now an enum so the routing
+## check cannot drift into a typo. Reset on respawn so a later fall doesn't
+## inherit an old tag.
+enum DamageSource { NONE, CREATURE }
+var last_damage_source: DamageSource = DamageSource.NONE
 ## R29: when the tag was stamped (Time ticks, msec). A tag only routes the
 ## death while it is FRESH — a swipe you survived minutes ago must not turn a
 ## later fall death into a creature jumpscare (the kill cam would weld to a
@@ -84,7 +87,7 @@ func _process(delta: float) -> void:
 		# keep the classic environmental route.
 		var tag_fresh: bool = float(Time.get_ticks_msec() - last_damage_stamp_ms) \
 				<= kill_source_window * 1000.0
-		if last_damage_source == "creature" and tag_fresh:
+		if last_damage_source == DamageSource.CREATURE and tag_fresh:
 			Events.player_killed_by_creature.emit()
 		Events.player_died.emit()
 
@@ -97,7 +100,7 @@ func _on_respawn_requested() -> void:
 	if not _dead:
 		return
 	_dead = false
-	last_damage_source = ""
+	last_damage_source = DamageSource.NONE
 	last_damage_stamp_ms = 0
 	last_damage_direction = Vector3.ZERO
 	_player.dead = false

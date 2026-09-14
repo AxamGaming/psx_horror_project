@@ -27,7 +27,7 @@ func _tick(delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null or not cre.has_alert():
 		return FAILURE
-	cre.set_task_tag("ActInvestigate")
+	cre.set_task_tag(NightmareCreature.TaskTag.INVESTIGATE)
 	_total += delta
 	if _total > 25.0:
 		cre.clear_alert()

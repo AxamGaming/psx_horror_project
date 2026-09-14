@@ -179,7 +179,10 @@ func _part_a() -> void:
 		hp != null and hp.stream != null)
 	if hp != null and hp.stream != null:
 		var dur: float = hp.stream.get_length()
-		_check("A8 heartbeat stream ~0.75 s lub-dub", dur > 0.5 and dur < 1.2,
+		# R32 policy: the asset is canonical. The shipped heartbeat.wav is a
+		# 1.91 s lub-dub one-shot; the old 0.5-1.2 s bound asserted a length
+		# from an earlier trim and made A8 permanently red.
+		_check("A8 heartbeat stream ~1.9 s lub-dub", dur > 1.5 and dur < 2.2,
 			"dur=%.2f" % dur)
 
 

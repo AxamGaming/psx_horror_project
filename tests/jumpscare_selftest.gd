@@ -29,6 +29,10 @@ extends SceneTree
 ##                               impact, SETTLE entered only once landed
 ##   K2h/i (R31) kill start   -> kill cam begins AT the player's view + FOV
 ##                               (no scare-cam snap / "rise from the ground")
+##
+##   R32: the suite resets Settings to authored defaults on frame 1, so a
+##   stale user://settings.cfg (camera_shake 0 from an earlier session) can
+##   no longer flip K3/K10.
 ## ============================================================================
 
 var _results: Array[String] = []
@@ -71,6 +75,17 @@ func _process(_d: float) -> bool:
 	match _phase:
 		0:
 			if _frames == 1:
+				# R32: never let a persisted user://settings.cfg leak into the
+				# assertions. K10 drives camera_shake/kill_fx to 0 mid-run and
+				# restores them at the END — a cfg left behind by an earlier
+				# session (or a run killed inside K10) zeroes the whip and the
+				# flash before K3 ever runs. Resetting (and saving) here makes
+				# the suite self-healing instead of flaky.
+				var set0: Node = root.get_node("/root/Settings")
+				set0.set_camera_shake(1.0)
+				set0.set_kill_fx(1.0)
+				set0.set_gore(1.0)
+				set0.set_reduce_flashes(false)
 				_main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 				root.add_child(_main)
 			if _frames > 30 and _boot_done():
@@ -243,9 +258,9 @@ func _process(_d: float) -> bool:
 				_frames = 0
 		6:  # K10b/K10c/K10d settings gating on a fresh kill
 			if _frames == 1:
-				var set: Node = root.get_node("/root/Settings")
-				set.set_camera_shake(0.0)
-				set.set_kill_fx(0.0)
+				var stg: Node = root.get_node("/root/Settings")
+				stg.set_camera_shake(0.0)
+				stg.set_kill_fx(0.0)
 				_rig.call("set_health", 1.0)
 				_cre.call("_tag_damage_source")
 				_events.call("emit_signal", "player_damaged", 999.0, Vector3(0.0, 0.0, 1.0))
@@ -274,9 +289,9 @@ func _process(_d: float) -> bool:
 					"variant=%s active=%s" % [String(_dir._variant), bool(_dir._active)])
 				_check("K11b staging beat table reloaded for the variant",
 					int(_dir._beats.size()) > 0)
-				var set2: Node = root.get_node("/root/Settings")
-				set2.set_camera_shake(1.0)
-				set2.set_kill_fx(1.0)
+				var stg2: Node = root.get_node("/root/Settings")
+				stg2.set_camera_shake(1.0)
+				stg2.set_kill_fx(1.0)
 				_events.call("emit_signal", "respawn_requested")
 				_phase = 8
 				_frames = 0

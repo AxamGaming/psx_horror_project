@@ -20,7 +20,7 @@ func _tick(_delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
 		return FAILURE
-	cre.set_task_tag("ActLunge")
+	cre.set_task_tag(NightmareCreature.TaskTag.LUNGE)
 	if not _started:
 		cre.start_lunge()
 		_started = true

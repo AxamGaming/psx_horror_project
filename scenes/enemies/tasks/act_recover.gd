@@ -15,7 +15,7 @@ func _tick(delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
 		return FAILURE
-	cre.set_task_tag("ActRecover")
+	cre.set_task_tag(NightmareCreature.TaskTag.RECOVER)
 	_t += delta
 	if _t >= cre.neutralize_time:
 		cre.recover()

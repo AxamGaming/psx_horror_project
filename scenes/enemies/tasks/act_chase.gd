@@ -20,7 +20,7 @@ func _tick(_delta: float) -> Status:
 	var cre: NightmareCreature = agent as NightmareCreature
 	if cre == null:
 		return FAILURE
-	cre.set_task_tag("ActChase")
+	cre.set_task_tag(NightmareCreature.TaskTag.CHASE)
 
 	# Target: actual player position if we have memory, else last-known.
 	var target: Vector3 = cre.player_pos()

@@ -410,7 +410,7 @@ func tick(delta: float) -> void:
 			_circle_sign = -_circle_sign
 		if _prowl_log_cd <= 0.0:
 			_prowl_log_cd = 3.0
-			_creature._log("PROWL unreachable goal task=%s" % _creature._task_tag)
+			_creature._log("PROWL unreachable goal task=%s" % _creature.task_tag_name())
 		var radial: Vector3 = to_goal.normalized() if to_goal.length_squared() > 0.01 \
 				else -_creature.global_transform.basis.z
 		var tang: Vector3 = Vector3(-radial.z, 0.0, radial.x) * _circle_sign
@@ -533,7 +533,7 @@ func _try_unstick() -> void:
 	if _unstick_fails >= 4:
 		_unstick_fails = 0
 		_on_unstick_giveup()
-		_creature._log("UNSTICK GIVEUP task=%s" % _creature._task_tag)
+		_creature._log("UNSTICK GIVEUP task=%s" % _creature.task_tag_name())
 		return
 
 	var md: Vector3 = move_dir.normalized() if move_dir.length_squared() > 0.001 \
@@ -562,18 +562,18 @@ func _try_unstick() -> void:
 
 
 func _on_nav_giveup() -> void:
-	if _creature._task_tag == "ActInvestigate" and _creature.has_alert():
+	if _creature._task_tag == NightmareCreature.TaskTag.INVESTIGATE and _creature.has_alert():
 		_creature.clear_alert()
 		_creature._log("NAV GIVEUP: cleared investigate alert")
-	elif _creature._task_tag == "ActPatrol":
+	elif _creature._task_tag == NightmareCreature.TaskTag.PATROL:
 		_creature.next_patrol_point()
 		_creature._log("NAV GIVEUP: skipped patrol point")
 
 
 func _on_unstick_giveup() -> void:
-	if _creature._task_tag == "ActInvestigate" and _creature.has_alert():
+	if _creature._task_tag == NightmareCreature.TaskTag.INVESTIGATE and _creature.has_alert():
 		_creature.clear_alert()
-	elif _creature._task_tag == "ActPatrol":
+	elif _creature._task_tag == NightmareCreature.TaskTag.PATROL:
 		_creature.next_patrol_point()
 
 

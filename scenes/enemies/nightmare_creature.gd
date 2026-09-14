@@ -66,7 +66,7 @@ const LOG_PATH  := "user://creature_log.txt"
 ## the sprint radius.
 ##
 ## 0.30 (default) sits between crouch-walk (0.15) and walk (0.50) in
-## movement.gd, which gives the intended stealth contract:
+## player_movement.gd, which gives the intended stealth contract:
 ##   idle / still / crouch-walk  -> never heard at distance
 ##   walk                        -> heard inside hear_radius * 0.50
 ##   sprint                      -> heard inside hear_radius * 1.00
@@ -240,7 +240,16 @@ var _noncombat_t: float = 999.0
 var _move_dir: Vector3 = Vector3.ZERO
 
 # ── Task tag (BT tasks stamp their name; used by navigator and log) ──────────
-var _task_tag: String = "-"
+## R32: was a free String ("ActChase", "-", "Feeding", ...). An enum makes a
+## typo a parse error instead of a silent behaviour change; TASK_TAG_LABELS
+## keeps the historical wire/log names so the debug panel, creature log and
+## ai_selftest string probes keep reading exactly what they always did.
+enum TaskTag { NONE, PATROL, INVESTIGATE, CHASE, SWIPE, LUNGE, RECOVER, SET_ALERT, FEEDING }
+const TASK_TAG_LABELS: Array[String] = [
+	"-", "ActPatrol", "ActInvestigate", "ActChase", "ActSwipe",
+	"ActLunge", "ActRecover", "ActSetAlert", "Feeding",
+]
+var _task_tag: TaskTag = TaskTag.NONE
 
 # ── Animation helpers ─────────────────────────────────────────────────────────
 var _anim: AnimationPlayer = null
@@ -483,7 +492,7 @@ func _tag_damage_source() -> void:
 		return
 	var sv: SurvivalSystem = player.find_child("Survival", true, false) as SurvivalSystem
 	if sv != null:
-		sv.last_damage_source = "creature"
+		sv.last_damage_source = SurvivalSystem.DamageSource.CREATURE
 		# R29: stamp the tag so survival's death router can expire it — only a
 		# fresh tag routes the death through the jumpscare.
 		sv.last_damage_stamp_ms = Time.get_ticks_msec()
@@ -563,7 +572,7 @@ func take_damage(amount: float, push_dir: Vector3) -> void:
 	_windup_t = 0.0
 	_lunging = false
 	_lunge_t = 0.0
-	_task_tag = "-"
+	_task_tag = TaskTag.NONE
 	if nav != null:
 		nav.stop()
 	_start_down_chain()
@@ -612,7 +621,7 @@ func recover() -> void:
 	_lunge_hit = false
 	_attack_cd = 0.0
 	_lunge_cd = 0.0
-	_task_tag = "-"
+	_task_tag = TaskTag.NONE
 	_down_phase = DownPhase.NONE
 	_down_speed = 1.0
 	health = max_health
@@ -641,7 +650,7 @@ func _on_player_died() -> void:
 	_feed_phase = FeedPhase.DROP
 	_feed_t = 0.0
 	_feed_growl_t = randf_range(5.0, 8.0)
-	_task_tag = "Feeding"
+	_task_tag = TaskTag.FEEDING
 	_react_t = 0.0
 	_anim_lock_t = 0.0
 	_bt_player.active = false
@@ -656,7 +665,7 @@ func _on_player_respawned() -> void:
 	if _feed_phase == FeedPhase.NONE:
 		return
 	_feed_phase = FeedPhase.NONE
-	_task_tag = "-"
+	_task_tag = TaskTag.NONE
 	if _awake:
 		_bt_player.active = true
 	forget_player()
@@ -929,12 +938,18 @@ func _end_lunge(hit: bool, blocked: bool) -> void:
 # Task-tag / BT interface
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func set_task_tag(t: String) -> void:
+func set_task_tag(t: TaskTag) -> void:
 	_task_tag = t
 
 
-func task_tag() -> String:
+func task_tag() -> TaskTag:
 	return _task_tag
+
+
+## R32: historical label for logs / debug panel / test probes. An enum would
+## print as its int under %s, so every human-readable reader goes through here.
+func task_tag_name() -> String:
+	return TASK_TAG_LABELS[_task_tag]
 
 
 func note_combat_start() -> void:
@@ -1083,7 +1098,7 @@ func _physics_process(delta: float) -> void:
 			global_position += away.normalized() * push
 
 	# ── Combat state tracking ─────────────────────────────────────────────────
-	if _task_tag == "ActChase" or _task_tag == "ActSwipe" or _task_tag == "ActLunge":
+	if _task_tag == TaskTag.CHASE or _task_tag == TaskTag.SWIPE or _task_tag == TaskTag.LUNGE:
 		_noncombat_t = 0.0
 	else:
 		_noncombat_t += delta
@@ -1195,7 +1210,7 @@ func _physics_process(delta: float) -> void:
 		_log("state awake=%s neu=%s pos=(%.2f,%.2f,%.2f) vreal=%.2f task=%s anim=%s dist=%.2f conf=%s heard=%s mem=%s" % [
 			str(_awake), str(_neutralized),
 			global_position.x, global_position.y, global_position.z,
-			real_hspd, _task_tag, aname, dist_to_player(),
+			real_hspd, task_tag_name(), aname, dist_to_player(),
 			str(awareness.confirmed() if awareness else false),
 			str(awareness.heard() if awareness else false),
 			str(awareness.has_memory() if awareness else false)])
@@ -1425,7 +1440,7 @@ func debug_state() -> Dictionary:
 		"mem":        awareness.has_memory() if awareness else false,
 		"anim":       aname,
 		"hp":         health,
-		"task":       _task_tag,
+		"task":       task_tag_name(),
 		"vreal":      nav.real_hspd if nav else 0.0,
 	}
 

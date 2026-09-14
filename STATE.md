@@ -1,13 +1,13 @@
-# STATE — [BUILD_TAG]
+# STATE — R31
 
-> Last updated: [YYYY-MM-DD]
-> Updated by: [round number + short description]
+> Last updated: 2026-09-14
+> Updated by: R31 — final playtest pass: footsteps, rising kill start, heavy-object crash weight
 
 ## Current build
 
-- **BUILD_TAG**: [R31]
-- **Engine**: Godot [4.7.1].stable.arch_linux
-- **Main scene**: `res://scenes/main.tscn` (boots `corridor_level.tscn`)
+- **BUILD_TAG**: R31
+- **Engine**: Godot 4.7.1.stable.arch_linux
+- **Main scene**: `res://scenes/main.tscn` (boots the corridor test loop)
 - **Test level for regression**: `res://scenes/levels/test_graybox.tscn` (F6 in editor)
 
 ## What's live
@@ -17,19 +17,23 @@
 - Level: `corridor_level.tscn` (spawn → door1 → corridor → crawl → door2 → hall → stage)
 - UI: noise meter, proximity monitor, survival HUD, crosshair, inventory, item toast, death overlay, debug panel, settings menu
 - Post: VHS shader (layer 2), kill FX (layer 4), UI crisp (layer 10)
-- Audio: AudioMgr with bus panners, positional world sounds, deafness/tinnitus
-- Nav: `nav_baker.gd` with own map, cell 0.15/0.2, agent_max_climb 0.6
+- Audio: `AudioMgr` with bus panners, positional world sounds, deafness/tinnitus
+- Nav: `nav_baker.gd` with its own map; cell 0.15/0.2; `agent_max_climb` 0.6
+
+## Recent status
+
+The project is currently in a working R31 state after the playtest fixes for ghost footsteps, the rising kill start, and the heavy-object crash/settle pass. The main loop remains a compact corridor horror prototype with an active AI chase system, noise/proximity pressure feedback, and a kill sequence tuned for impact and readability.
 
 ## What's dead (deleted, safe to ignore)
 
-- `movement_controller.gd`, `perception.gd`, `memory.gd`, `awareness_state.gd` — deleted [date], superseded by CreatureNavigator/CreatureAwareness since R16. Do not re-add.
-- `jumpscare_director.gd`, `jumpscare_anim.tres`, `jumpscare_rig.tscn` — R26–R29 rig, replaced by `kill_director.gd` in R30. Docs kept in `JUMPSCARE_SYSTEM.md` for historical routing logic only.
+- `movement_controller.gd`, `perception.gd`, `memory.gd`, `awareness_state.gd` — deleted in earlier rounds, superseded by `CreatureNavigator` / `CreatureAwareness` since R16. Do not re-add.
+- `jumpscare_director.gd`, `jumpscare_anim.tres`, `jumpscare_rig.tscn` — R26–R29 rig, replaced by `kill_director.gd` in R30. Docs kept in `docs/JUMPSCARE_SYSTEM.md` for historical routing logic only.
 
 ## Known flakes (rerun once before bisecting)
 
-- `ai_selftest.gd` P5/L2 — seed-flaky ~25-40%. Not a code bug. Rerun once if red.
+- `ai_selftest.gd` P5/L2 — seed-flaky around 25–40%. Not a code bug; rerun once if red.
 - `jumpscare_selftest.gd` K3 — fails if `user://settings.cfg` has `camera_shake=0.0`. Delete the cfg or check the setting.
-- `proximity_selftest.gd` A8 — expects heartbeat.wav length 0.5–1.2 s; current file is 1.91 s. Either restore the short wav or update the test bound.
+- `proximity_selftest.gd` A8 — expects heartbeat.wav length 0.5–1.2 s; the current file is 1.91 s. Either restore the shorter wav or update the test bound.
 
 ## Known-benign exit noise
 
@@ -43,13 +47,13 @@ All expected. Ignore.
 
 ## What's next (agenda)
 
-1. [ ] Fix `settings.cfg` flake — have `jumpscare_selftest.gd` call `Settings.set_camera_shake(1.0)` at test start.
-2. [ ] Decide heartbeat.wav: keep 1.91 s (update test) or re-trim to 0.75 s.
-3. [ ] `CHANGELOG.md` — extract R-numbers and ROUND-numbers from inline comments into one file; reference `#R24` instead of retelling.
-4. [ ] Enum migration: `_task_tag: String` → enum, `last_damage_source: String` → enum.
-5. [ ] Rename `movement.gd` → `player_movement.gd` (matches `class_name PlayerMovement`).
-6. [ ] Move `JUMPSCARE_SYSTEM.md` to `docs/archive/`.
-7. [ ] Extract `_rounded_points` / `_closed` from `noise_meter_bar.gd` + `proximity_trace.gd` into shared `ui_draw_util.gd`.
+1. [ ] Fix `settings.cfg` flake by having `jumpscare_selftest.gd` call `Settings.set_camera_shake(1.0)` at test start.
+2. [ ] Decide heartbeat.wav policy: keep the 1.91 s version and update the test, or re-trim it to ~0.75 s.
+3. [ ] Add a single `CHANGELOG.md` that centralizes R-number and round notes instead of relying on inline comments.
+4. [ ] Complete enum migration: `_task_tag: String` → enum, `last_damage_source: String` → enum.
+5. [ ] Rename `movement.gd` → `player_movement.gd` to match `class_name PlayerMovement`.
+6. [ ] Move `docs/JUMPSCARE_SYSTEM.md` into `docs/archive/`.
+7. [ ] Extract `_rounded_points` / `_closed` from `noise_meter_bar.gd` and `proximity_trace.gd` into a shared `ui_draw_util.gd`.
 
 ## Test suites
 
@@ -63,24 +67,24 @@ All expected. Ignore.
 
 ## Key docs (in order of usefulness)
 
-- `docs/STATE.md` — this file
+- `STATE.md` — this file
 - `docs/FIXES_R31_*.md` — most recent fixes
 - `docs/FIXES_R29_*.md` — repo repair + pocket escape + kill routing
 - `docs/KILL_SEQUENCE_R30.md` — the kill system as-built
 - `docs/NOISE_METER.md` — noise meter + hearing tiers
 - `docs/PROXIMITY_MONITOR_DESIGN.md` — proximity monitor
-- `docs/PROP_WORKFLOW.md` — how to add props
-- `CREDITS.md` — every asset, every license
+- `README/PROP_WORKFLOW.md` — how to add props
+- `README/CREDITS.md` — every asset, every license
 
 ## Conventions (do not violate)
 
-- **Single-writer rules**: CameraRig owns camera local transform; CreatureNavigator owns creature velocity.x/z; MouseLook owns HeadPivot pitch + body yaw; PlayerMovement owns position/velocity.
+- **Single-writer rules**: `CameraRig` owns camera local transform; `CreatureNavigator` owns creature velocity.x/z; `MouseLook` owns `HeadPivot` pitch + body yaw; `PlayerMovement` owns position/velocity.
 - **UI de-hardcoded**: all UI is `.tscn` scenes; scripts hold functionality only.
 - **Signals via `Events` autoload**: no direct cross-system references.
-- **Self-tests read live exports**: retuning in inspector changes what's asserted, doesn't break the test.
+- **Self-tests read live exports**: retuning in the inspector changes what is asserted without breaking the test.
 - **R-numbered docs**: each fix gets a `FIXES_R<num>_<short>.md` when the round is done.
-- **No AI-generated comments in .tscn files**: Godot 4.7's tscn parser silently drops the first line after a comment inside a node block (R26d trap).
+- **No AI-generated comments in .tscn files**: Godot 4.7's `tscn` parser silently drops the first line after a comment inside a node block (R26d trap).
 
-## Current questions open to Qwen
+## Current question for the next pass
 
-- [What's the next thing you want to build or fix? Write one line here.]
+- Next target: finish the low-noise quality pass and stabilize the remaining self-test flake around settings state. 

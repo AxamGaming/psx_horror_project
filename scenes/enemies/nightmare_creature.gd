@@ -262,7 +262,7 @@ var _hull_pieces: Array = []
 var _sweep_t: float = 0.0
 
 # ── R26 jumpscare hold ────────────────────────────────────────────────────────
-## Set by JumpscareDirector for the duration of the scare. While held:
+## Set by KillDirector for the duration of the scare. While held:
 ## locomotion, BT and the per-frame anim selector are frozen (so the roar pose
 ## written once by the JumpscareAnim track persists), feeding never starts,
 ## and the body stands its ground in front of the kill camera.
@@ -362,11 +362,11 @@ func _ready() -> void:
 
 	# ── Awareness controller ──────────────────────────────────────────────────
 	awareness = CreatureAwareness.new()
-	# R27: the jumpscare rig normally lives inline in this scene (editable).
-	# If a merged/edited .tscn ever loses that block, instance the canonical
-	# rig at runtime so the system can never silently disappear.
-	if get_node_or_null("JumpscareDirector") == null:
-		var rig: PackedScene = preload("res://scenes/enemies/jumpscare_rig.tscn")
+	# R30: the kill rig normally lives inline in this scene (editable). If a
+	# merged/edited .tscn ever loses that block, instance the canonical rig at
+	# runtime so the kill sequence can never silently disappear.
+	if get_node_or_null("KillDirector") == null:
+		var rig: PackedScene = preload("res://scenes/enemies/kill_rig.tscn")
 		add_child(rig.instantiate())
 	awareness.name = "Awareness"
 	add_child(awareness)
@@ -1586,10 +1586,18 @@ func _update_hull_transforms() -> void:
 			to_global(body_offset))
 
 
+## R30: the KillDirector parents its own AnimationPlayers (KillBodyAnim, deep
+## in the rig, and Staging) inside this subtree. They are NOT gait players —
+## if the feeding/gait selector ever grabbed one it would play "walk" into the
+## kill performance and stop seeking it. Skip the kill rig by name.
+func _is_kill_rig_player(n: Node) -> bool:
+	return n.name.begins_with("Kill") or n.name == "Staging"
+
+
 func _find_anim(n: Node) -> AnimationPlayer:
 	for c in n.get_children():
 		var a: AnimationPlayer = c as AnimationPlayer
-		if a != null:
+		if a != null and not _is_kill_rig_player(a):
 			return a
 		var r: AnimationPlayer = _find_anim(c)
 		if r != null:

@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/fx/kill_fx.gd" id="1_scr"]
+[ext_resource type="Shader" path="res://shaders/kill_fx.gdshader" id="2_sh"]
+[ext_resource type="Texture2D" path="res://assets/textures/lens_blood.png" id="3_lens"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kfx"]
+shader = ExtResource("2_sh")
+shader_parameter/flash = 0.0
+shader_parameter/flash_color = Color(0.62, 0.02, 0.01, 1)
+shader_parameter/chroma = 0.0
+shader_parameter/tear = 0.0
+shader_parameter/vignette = 0.0
+shader_parameter/smear = 0.0
+shader_parameter/desat = 0.0
+shader_parameter/grain = 0.0
+shader_parameter/jolt_px = 0.0
+shader_parameter/clock = 0.0
+shader_parameter/fade = 0.0
+shader_parameter/Lens = ExtResource("3_lens")
+
+[node name="KillFX" type="CanvasLayer"]
+layer = 4
+script = ExtResource("1_scr")
+
+[node name="Rect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_kfx")

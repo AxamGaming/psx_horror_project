@@ -48,6 +48,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _dead:
 		return   # corpse cam: look locked until respawn
 	if event.is_action_pressed("ui_cancel"):
+		# R30: while anything owns the mouse (settings/pause menu, kill cam)
+		# that system owns Escape too; otherwise both would toggle capture.
+		if Events.ui_wants_mouse:
+			return
 		_toggle_capture()
 		return
 

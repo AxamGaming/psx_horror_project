@@ -255,6 +255,14 @@ func _ready() -> void:
 
 func _on_player_died_flag() -> void:
 	_dead = true
+	# R31: kill the gait engine HARD on death. The step phase is driven by
+	# movement.input_active / planar_speed, and those can stay stale for the
+	# whole death screen (the kill cinematic freezes the body's physics
+	# process, so the corpse branch never gets to republish zeros). Without
+	# this, holding W through a death kept heel_strike -> FOOTSTEP AUDIO
+	# marching through the kill cam and the death menu.
+	energy = 0.0
+	step_rate = 0.0
 
 
 ## Respawn also resets the whole physical state: no ghost wobble, no stuck
@@ -369,7 +377,7 @@ func _update_energy(delta: float) -> void:
 func _advance_phase(delta: float) -> void:
 	var gait_rate: float = _current_step_rate()
 	var target_rate: float = 0.0
-	if _player.input_active and energy > min_step_energy:
+	if not _dead and _player.input_active and energy > min_step_energy:
 		# Cadence floor keeps early/late steps at human tempo — amplitude
 		# carries the "starting/stopping" feel, never slow-motion cadence.
 		target_rate = gait_rate * (cadence_floor + (1.0 - cadence_floor) * energy)
@@ -396,7 +404,7 @@ func _check_step_boundary() -> void:
 	if health01 < low_state_threshold and (idx % 2) == 1:
 		_step_depth_target *= 1.0 + limp_depth_extra
 		_roll_vel += limp_roll_kick_deg * (1.0 - health01)
-	if _player.input_active and _player.is_on_floor() and energy > min_step_energy:
+	if not _dead and _player.input_active and _player.is_on_floor() and energy > min_step_energy:
 		var strength: float = clampf(energy * _gait_amp_mult(), 0.0, 1.6)
 		heel_strike.emit(strength, idx % 2)  # alternating feet, deterministic
 		_strike_count += 1

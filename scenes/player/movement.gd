@@ -104,6 +104,7 @@ func _physics_process(delta: float) -> void:
 		# through the world.)
 		if fly_debug:
 			_exit_fly()
+		freeze_corpse()
 		velocity.x = 0.0
 		velocity.z = 0.0
 		velocity.y = maxf(velocity.y - gravity * delta, -max_fall_speed)
@@ -297,6 +298,22 @@ func _detect_landing(pre_move_fall: float) -> void:
 			var energy := clampf((pre_move_fall - hard_landing_speed) / 8.0, 0.0, 1.0)
 			Events.hard_landed.emit(energy)
 	_was_on_floor = grounded
+
+
+## R31: publish a dead-still state so downstream READERS (camera rig gait
+## engine -> footstep audio, noise meter, creature hearing, debug panel) stop
+## the moment death lands. The dead branch above early-returns before
+## _update_gait_state(), so input_active/planar_speed/gait/noise_level would
+## otherwise stay frozen at their last living values — holding W through a
+## death used to keep footsteps marching into the death menu. KillDirector
+## also calls this directly before it freezes physics processing for the kill
+## cinematic (while frozen, the dead branch never runs).
+func freeze_corpse() -> void:
+	input_active = false
+	planar_speed = 0.0
+	noise_level = 0.0
+	gait = Gait.IDLE
+	is_sprinting = false
 
 
 func _update_gait_state() -> void:

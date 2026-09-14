@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://k30killrig01"]
+
+[ext_resource type="Script" path="res://scenes/enemies/kill_director.gd" id="1_kdir"]
+[ext_resource type="AnimationLibrary" path="res://scenes/enemies/kill_staging.tres" id="2_stage"]
+[ext_resource type="Script" path="res://scenes/fx/blood_burst.gd" id="3_blood"]
+
+[node name="KillDirector" type="Node3D"]
+script = ExtResource("1_kdir")
+
+[node name="CreatureKillCamera" type="Camera3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 0.99756, 0.06976, 0, -0.06976, -0.99756, 0, 1.8, -2.25)
+fov = 94.25
+
+[node name="JumpscareLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 2.1, -1.9)
+visible = false
+light_color = Color(1, 0.3, 0.1, 1)
+light_energy = 0.0
+omni_range = 4.0
+
+[node name="Staging" type="AnimationPlayer" parent="."]
+libraries/ = ExtResource("2_stage")
+
+[node name="BloodBurst" type="Node3D" parent="."]
+script = ExtResource("3_blood")

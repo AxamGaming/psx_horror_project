@@ -6,9 +6,9 @@
 [ext_resource type="AudioStream" uid="uid://wlh82ybnx7vx" path="res://audio/sfx/creature_growl.wav" id="4_growl"]
 [ext_resource type="AudioStream" uid="uid://dmf737ki6qglk" path="res://audio/sfx/creature_step.wav" id="5_step"]
 [ext_resource type="AudioStream" uid="uid://qwcurpn48ux8" path="res://audio/sfx/creature_screech.wav" id="6_screech"]
-[ext_resource type="Script" uid="uid://cankufnybi750" path="res://scenes/enemies/jumpscare_director.gd" id="7_jsdir"]
-[ext_resource type="AudioStream" uid="uid://cvd7mckwmvnm0" path="res://audio/sfx/jumpscare_stinger.wav" id="8_stinger"]
-[ext_resource type="AnimationLibrary" uid="uid://bmono0kfmfise" path="res://scenes/enemies/jumpscare_anim.tres" id="9_lib"]
+[ext_resource type="Script" uid="uid://52clh6i3tmky" path="res://scenes/enemies/kill_director.gd" id="7_kdir"]
+[ext_resource type="AnimationLibrary" uid="uid://tt50316rg4wg" path="res://scenes/enemies/kill_staging.tres" id="8_stage"]
+[ext_resource type="Script" uid="uid://c2dwqjrlvjrtt" path="res://scenes/fx/blood_burst.gd" id="9_blood"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.45
@@ -71,21 +71,23 @@ stream = ExtResource("5_step")
 [node name="Screech" type="AudioStreamPlayer" parent="." unique_id=823055910]
 stream = ExtResource("6_screech")
 
-[node name="JumpscareDirector" type="Node3D" parent="." unique_id=1592523930]
-script = ExtResource("7_jsdir")
+[node name="KillDirector" type="Node3D" parent="." unique_id=2136900430]
+script = ExtResource("7_kdir")
+cross_distance = 0.0
+db_sub_boom = 3.0
 
-[node name="CreatureKillCamera" type="Camera3D" parent="JumpscareDirector" unique_id=620239257]
+[node name="CreatureKillCamera" type="Camera3D" parent="KillDirector" unique_id=1618735106]
 transform = Transform3D(-0.9981348, 0.0034607542, -0.060950175, 0, 0.9983919, 0.05668875, 0.061048344, 0.056583013, -0.9965297, 0, 1.8, -2.25)
 fov = 94.25
 
-[node name="JumpscareLight" type="OmniLight3D" parent="JumpscareDirector" unique_id=377427529]
+[node name="JumpscareLight" type="OmniLight3D" parent="KillDirector" unique_id=1743109758]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05904118, 0.98785615, -1.05)
 light_color = Color(1, 0.3, 0.1, 1)
 light_energy = 0.0
 omni_range = 4.0
 
-[node name="StingerPlayer" type="AudioStreamPlayer" parent="JumpscareDirector" unique_id=1201561045]
-stream = ExtResource("8_stinger")
+[node name="Staging" type="AnimationPlayer" parent="KillDirector" unique_id=1980428126]
+libraries/ = ExtResource("8_stage")
 
-[node name="JumpscareAnim" type="AnimationPlayer" parent="JumpscareDirector" unique_id=45855038]
-libraries/ = ExtResource("9_lib")
+[node name="BloodBurst" type="Node3D" parent="KillDirector" unique_id=523144332]
+script = ExtResource("9_blood")

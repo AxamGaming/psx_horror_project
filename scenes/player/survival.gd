@@ -33,6 +33,10 @@ var last_damage_source: String = ""
 ## creature that may be across the map). The lethal blow lands within frames
 ## of its tag, so the window only needs to cover that + death-check latency.
 var last_damage_stamp_ms: int = 0
+## R30: world-space direction the last damaging blow was travelling (for a
+## creature hit: creature -> player). The KillDirector whips the camera toward
+## the blow from this, so a hit from the left reads as a hit from the LEFT.
+var last_damage_direction: Vector3 = Vector3.ZERO
 ## How long a damage-source tag stays authoritative for death routing.
 @export var kill_source_window: float = 2.0
 var _spawn: Vector3
@@ -44,6 +48,7 @@ func _ready() -> void:
 	_rig = Events.main_camera as CameraRig
 	_spawn = _player.global_position
 	Events.respawn_requested.connect(_on_respawn_requested)
+	Events.player_damaged.connect(_on_player_damaged)
 
 
 func _process(delta: float) -> void:
@@ -84,12 +89,17 @@ func _process(delta: float) -> void:
 		Events.player_died.emit()
 
 
+func _on_player_damaged(_amount: float, direction: Vector3) -> void:
+	last_damage_direction = direction
+
+
 func _on_respawn_requested() -> void:
 	if not _dead:
 		return
 	_dead = false
 	last_damage_source = ""
 	last_damage_stamp_ms = 0
+	last_damage_direction = Vector3.ZERO
 	_player.dead = false
 	_rig.set_health(1.0)
 	_rig.set_stamina(1.0)

@@ -1,47 +1,50 @@
-[gd_scene format=3 uid="uid://6ody5wm52o0w"]
+[gd_scene load_steps=15 format=3]
 
-[ext_resource type="Script" uid="uid://daxvbpq30ya2n" path="res://scenes/main.gd" id="1_main"]
-[ext_resource type="PackedScene" uid="uid://di51fmvym7rk" path="res://scenes/levels/corridor_level.tscn" id="2_level"]
-[ext_resource type="Shader" uid="uid://cmjacboxtpyiq" path="res://shaders/vhs_wiggle.gdshader" id="3_vhs"]
-[ext_resource type="PackedScene" uid="uid://7lr4i03krrc3" path="res://scenes/ui/debug_panel.tscn" id="4_panel_scn"]
+[ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/levels/corridor_level.tscn" id="2_level"]
+[ext_resource type="Shader" path="res://shaders/vhs_wiggle.gdshader" id="3_vhs"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_panel.tscn" id="4_panel_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="5_inv_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/death_overlay.tscn" id="6_death_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/item_toast.tscn" id="7_toast_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/survival_hud.tscn" id="8_hud_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crosshair.tscn" id="9_cross_scn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/noise_meter.tscn" id="10_meter_scn"]
-[ext_resource type="PackedScene" uid="uid://cm20sfu736crd" path="res://scenes/ui/proximity_monitor.tscn" id="11_prox_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/proximity_monitor.tscn" id="11_prox_scn"]
+[ext_resource type="PackedScene" path="res://scenes/fx/kill_fx.tscn" id="12_killfx_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings_menu.tscn" id="13_set_scn"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vhs"]
 shader = ExtResource("3_vhs")
 shader_parameter/wiggle = 0.03
-shader_parameter/wiggle_speed = 25.0
+shader_parameter/wiggle_speed = 25
 shader_parameter/smear = 1.0
 shader_parameter/blur_samples = 15
 
-[node name="Main" type="Node" unique_id=508005204]
+[node name="Main" type="Node"]
 script = ExtResource("1_main")
 
-[node name="GameViewport" type="SubViewport" parent="." unique_id=1805367273]
+[node name="GameViewport" type="SubViewport" parent="."]
 size = Vector2i(640, 360)
 render_target_update_mode = 4
 
-[node name="TestGraybox" parent="GameViewport" unique_id=241533496 instance=ExtResource("2_level")]
+[node name="TestGraybox" parent="GameViewport" instance=ExtResource("2_level")]
 
-[node name="ViewportDisplay" type="TextureRect" parent="." unique_id=369649354]
+[node name="ViewportDisplay" type="TextureRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture_filter = 0
 expand_mode = 1
 stretch_mode = 5
 
-[node name="PostFX" type="CanvasLayer" parent="." unique_id=501106099]
+[node name="PostFX" type="CanvasLayer" parent="."]
 layer = 2
 
-[node name="VHS" type="ColorRect" parent="PostFX" unique_id=24066211]
+[node name="VHS" type="ColorRect" parent="PostFX"]
 material = SubResource("ShaderMaterial_vhs")
 anchors_preset = 15
 anchor_right = 1.0
@@ -50,34 +53,31 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=1055864365]
+[node name="KillFX" parent="." instance=ExtResource("12_killfx_scn")]
+
+[node name="UI" type="CanvasLayer" parent="."]
 layer = 10
 
-[node name="NoiseMeter" parent="UI" unique_id=814480846 instance=ExtResource("10_meter_scn")]
-layout_mode = 3
+[node name="NoiseMeter" parent="UI" instance=ExtResource("10_meter_scn")]
 
-[node name="ProximityMonitor" parent="UI" unique_id=483319659 instance=ExtResource("11_prox_scn")]
-audio_vol_contact_db = 6.0
+[node name="ProximityMonitor" parent="UI" instance=ExtResource("11_prox_scn")]
 
-[node name="DebugPanel" parent="UI" unique_id=666367510 instance=ExtResource("4_panel_scn")]
+[node name="DebugPanel" parent="UI" instance=ExtResource("4_panel_scn")]
 
-[node name="InventoryUI" parent="UI" unique_id=2043708482 instance=ExtResource("5_inv_scn")]
-layout_mode = 3
+[node name="InventoryUI" parent="UI" instance=ExtResource("5_inv_scn")]
 
-[node name="DeathOverlay" parent="UI" unique_id=2094004401 instance=ExtResource("6_death_scn")]
-layout_mode = 3
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 1
 
-[node name="ItemToast" parent="UI" unique_id=1599272014 instance=ExtResource("7_toast_scn")]
-layout_mode = 3
+[node name="SurvivalHUD" parent="HUD" instance=ExtResource("8_hud_scn")]
 
-[node name="CrosshairCrisp" parent="UI" unique_id=829170277 instance=ExtResource("9_cross_scn")]
-layout_mode = 3
+[node name="Crosshair" parent="HUD" instance=ExtResource("9_cross_scn")]
+
+[node name="DeathOverlay" parent="UI" instance=ExtResource("6_death_scn")]
+
+[node name="ItemToast" parent="UI" instance=ExtResource("7_toast_scn")]
+
+[node name="CrosshairCrisp" parent="UI" instance=ExtResource("9_cross_scn")]
 alpha_mix = 0.7
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1260504756]
-
-[node name="SurvivalHUD" parent="HUD" unique_id=1617779264 instance=ExtResource("8_hud_scn")]
-layout_mode = 3
-
-[node name="Crosshair" parent="HUD" unique_id=1490740205 instance=ExtResource("9_cross_scn")]
-layout_mode = 3
+[node name="SettingsMenu" parent="UI" instance=ExtResource("13_set_scn")]

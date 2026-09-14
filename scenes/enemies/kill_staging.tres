@@ -1,0 +1,167 @@
+[gd_resource type="AnimationLibrary" format=3 uid="uid://tt50316rg4wg"]
+
+[sub_resource type="Animation" id="Animation_65k4l"]
+length = 4.5
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.16, 0.62, 1.15, 1.55, 1.95, 2.65, 3.15, 4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
+"values": [{
+"args": [],
+"method": &"beat_impact"
+}, {
+"args": [],
+"method": &"beat_grab"
+}, {
+"args": [],
+"method": &"beat_gape"
+}, {
+"args": [],
+"method": &"beat_bite"
+}, {
+"args": [],
+"method": &"beat_slowmo_end"
+}, {
+"args": [],
+"method": &"beat_thrash"
+}, {
+"args": [],
+"method": &"beat_drop"
+}, {
+"args": [],
+"method": &"beat_settle"
+}, {
+"args": [],
+"method": &"beat_fade"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("JumpscareLight:light_energy")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.35, 1.15, 1.6, 2.7, 3.6, 4.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 9.0, 3.2, 7.5, 2.6, 4.0, 1.4, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_rwyrm"]
+length = 4.5
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.16, 0.62, 1.15, 1.55, 1.95, 2.65, 3.15, 4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
+"values": [{
+"args": [],
+"method": &"beat_impact"
+}, {
+"args": [],
+"method": &"beat_grab"
+}, {
+"args": [],
+"method": &"beat_lift"
+}, {
+"args": [],
+"method": &"beat_bite"
+}, {
+"args": [],
+"method": &"beat_slowmo_end"
+}, {
+"args": [],
+"method": &"beat_thrash"
+}, {
+"args": [],
+"method": &"beat_drop"
+}, {
+"args": [],
+"method": &"beat_settle"
+}, {
+"args": [],
+"method": &"beat_fade"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("JumpscareLight:light_energy")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.35, 1.15, 1.6, 2.7, 3.6, 4.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 9.0, 3.2, 7.5, 2.6, 4.0, 1.4, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_fd0sg"]
+length = 4.5
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.75, 1.15, 1.55, 1.95, 2.65, 3.15, 4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
+"values": [{
+"args": [],
+"method": &"beat_impact"
+}, {
+"args": [],
+"method": &"beat_grab"
+}, {
+"args": [],
+"method": &"beat_gape"
+}, {
+"args": [],
+"method": &"beat_bite"
+}, {
+"args": [],
+"method": &"beat_slowmo_end"
+}, {
+"args": [],
+"method": &"beat_thrash"
+}, {
+"args": [],
+"method": &"beat_drop"
+}, {
+"args": [],
+"method": &"beat_settle"
+}, {
+"args": [],
+"method": &"beat_fade"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("JumpscareLight:light_energy")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.35, 1.15, 1.6, 2.7, 3.6, 4.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 9.0, 3.2, 7.5, 2.6, 4.0, 1.4, 0.0]
+}
+
+[resource]
+_data = {
+&"kill_grab": SubResource("Animation_65k4l"),
+&"kill_slam": SubResource("Animation_rwyrm"),
+&"kill_swipe": SubResource("Animation_fd0sg")
+}

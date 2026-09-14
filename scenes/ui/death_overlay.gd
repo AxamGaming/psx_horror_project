@@ -6,7 +6,7 @@ class_name DeathOverlay
 ## (SurvivalSystem performs the reset and emits player_respawned -> hide).
 ## ============================================================================
 
-## R26: one-shot gate set by JumpscareDirector when a creature kill routes
+## R26: one-shot gate set by KillDirector when a creature kill routes
 ## through the jumpscare instead of the death screen.
 var _suppressed: bool = false
 
@@ -19,9 +19,18 @@ func _ready() -> void:
 	Events.player_respawned.connect(_hide)
 
 
-## R26: called by JumpscareDirector before player_died propagates.
+## R26: called by KillDirector before player_died propagates.
 func suppress_next() -> void:
 	_suppressed = true
+
+
+## R30: the KillDirector suppresses the player_died fade and calls this at its
+## FADE beat instead, so the death screen arrives over the settled floor shot.
+func present() -> void:
+	_suppressed = false
+	visible = true
+	var tw: Tween = create_tween()
+	tw.tween_property(self, "modulate", Color(1, 1, 1, 1), 1.2).set_trans(Tween.TRANS_SINE)
 
 
 func _show() -> void:

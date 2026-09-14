@@ -1,3 +1,9 @@
+> **SUPERSEDED (R30).** The R26–R29 director described below was deleted and
+> replaced by the kill sequence in [`KILL_SEQUENCE_R30.md`](KILL_SEQUENCE_R30.md)
+> (`scenes/enemies/kill_director.gd`). This file is kept only as the historical
+> design record for the routing decisions that survived (damage-source tagging,
+> death-overlay suppression, camera-authority handoff).
+
 # Jumpscare System — As-Built (R26)
 
 Implements `uploads/2026-09-12-creature-jumpscare-design.md` with the four field

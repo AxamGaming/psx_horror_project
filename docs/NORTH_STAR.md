@@ -1,4 +1,4 @@
-# NORTH STAR v2 — "THE LINE" (working title; draft, pending approval)
+# NORTH STAR v2 — "THE ASSESSMENT" (canon as of R33; title chosen by author)
 
 > **DRAFT built from the author's interview (docs/DESIGN-INTERVIEW.md lives in
 > the workspace; batches 1–3, 2026-09-14).** Supersedes the rejected theatre
@@ -163,22 +163,15 @@ Corner pieces NOT requested: butted walls read fine at period grade.
 T-junctions compose from straights. Room shells compose from walls+floor+
 ceiling. The kit is already sufficient for everything except openings.
 
-## Title candidates (author: "something cool, reference real games, not AI-smelling")
+## Title — CANON: THE ASSESSMENT
 
-1. **HUM** — one-word modern register (Signalis, Routine, Scorn). Names the
-   real-world phenomenon: a low sound with no findable source — unreliable
-   perception as a title. The drone bed IS the hum; the audio direction and
-   the title become the same object. Store-page strong.
-2. **THE ASSESSMENT** — paperwork horror (Severance's corporate dread, Papers
-   Please mundanity). The surface story as title; at the reveal it inverts:
-   the player understands who was really being assessed, and since when.
-3. **B2** — signage title, liminal lineage (backrooms, Kane Pixels): an
-   elevator button as a name. Cryptic, human, un-marketable-safe, very cool
-   in the right typography.
-
-Agent's pick: **HUM** (shortest distance between the audio design and the
-theme; impossible to mistake for generated filler). Retired: "THE LINE"
-(working title, served its purpose).
+Author's pick from the candidate list (batch 4/title question). Lineage:
+paperwork horror — Severance's corporate dread, Papers Please mundanity;
+the surface story as title, inverting at the reveal without changing a
+letter. `project.godot` carries it; the death overlay speaks its register
+(`ASSESSMENT INTERRUPTED / [R] resume the survey`, see DESIGN_R33 §1).
+Retired candidates: HUM (audio-title, strong), B2 (signage-title),
+"THE LINE" (v2 working title).
 
 ## Answered / remaining
 

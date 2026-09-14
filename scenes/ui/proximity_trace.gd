@@ -24,7 +24,7 @@ var debug_draw_calls: int = 0
 
 
 func _ready() -> void:
-	_glow_tex = _make_radial_glow(96)
+	_glow_tex = _make_radial_glow(45)
 
 
 func _process(delta: float) -> void:

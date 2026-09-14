@@ -1,0 +1,4 @@
+res://scenes/main.tscn
+res://scenes/enemies/kill_staging.tres
+res://data/item_database.tres
+res://scenes/main.gd
